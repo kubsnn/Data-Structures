@@ -136,8 +136,20 @@ inline void LinkedList<_Ty>::insert(_Ty&& _Val, unsigned int _Index)
 template<typename _Ty>
 inline bool LinkedList<_Ty>::remove_at(unsigned int _Index)
 {
-	// TODO: REMOVE AT INDEX FUNCTION!
-	return false;
+	if (_Index == _size - 1) return pop_back();
+	if (_Index == 0) return pop_begin();
+
+	auto node = _search(_Index);
+	auto prev = node->prev;
+	auto next = node->next;
+
+	delete node;
+
+	prev->next = next;
+	next->prev = prev;
+
+	--_size;
+	return true;
 }
 
 template<typename _Ty>
