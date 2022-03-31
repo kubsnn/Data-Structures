@@ -3,21 +3,21 @@
 #include "Hash.h"
 
 template<class _Ty1, class _Ty2>
-struct pair
+struct Pair
 {
 	_Ty1 first;
 	_Ty2 second;
 
-	pair(_Ty1 _First, _Ty2 _Second) {
+	Pair(_Ty1 _First, _Ty2 _Second) {
 		first = _First;
 		second = _Second;
 	}
 };
 
 template<class _Ty1, class _Ty2>
-struct Hash<pair<_Ty1, _Ty2>>
+struct Hash<Pair<_Ty1, _Ty2>>
 {
-	size_t operator()(const pair<_Ty1, _Ty2>& _Pair) {
+	size_t operator()(const Pair<_Ty1, _Ty2>& _Pair) {
 		size_t hash1 = Hash<_Ty1>()(_Pair.first);
 		size_t hash2 = Hash<_Ty2>()(_Pair.second);
 		return hash1 + hash2;
