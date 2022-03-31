@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include "Hash.h"
 #include "Utility.h"
@@ -26,6 +26,7 @@ public:
 
 	void insert(const _TKey& _Key, const _TValue& _Val);
 	void insert(const _TKey& _Key, _TValue&& _Val);
+	void insert(_TKey&& _Key, _TValue&& _Val);
 
 	_TValue& find(const _TKey& _Key);
 
@@ -35,11 +36,17 @@ public:
 	const HashTableIterator<_TKey, _TValue> end() const;
 
 	_TValue& operator[](const _TKey& _Key);
+	const _TValue& operator[](const _TKey& _Key) const;
+
+	HashTable<_TKey, _TValue>& operator=(const HashTable<_TKey, _TValue>& _Table);
+	HashTable<_TKey, _TValue>& operator=(HashTable<_TKey, _TValue>&& _Table);
 private:
 	const size_t MAX_SIZE = 997;
 	LinkedList<HashPair<_TKey, _TValue>>** data;
 
 	void _insert(HashPair<_TKey, _TValue>& _Pair);
+	void _copy_from(const HashTable<_TKey, _TValue>& _Table);
+	void _clear();
 };
 
 template<class _TKey, class _TValue>
@@ -52,11 +59,7 @@ inline HashTable<_TKey, _TValue>::HashTable()
 template<class _TKey, class _TValue>
 inline HashTable<_TKey, _TValue>::HashTable(const HashTable<_TKey, _TValue>& _Table)
 {
-	for (int i = 0; i < MAX_SIZE; ++i) {
-		if (_Table.data[i]) {
-			*data[i] = LinkedList<HashPair<_TKey, _TValue>>(_Table.data[i]);
-		}
-	}
+	_copy_from(_Table);
 }
 
 template<class _TKey, class _TValue>
@@ -69,7 +72,7 @@ inline HashTable<_TKey, _TValue>::HashTable(HashTable<_TKey, _TValue>&& _Table)
 template<class _TKey, class _TValue>
 inline HashTable<_TKey, _TValue>::~HashTable()
 {
-	delete[] data;
+	_clear();
 }
 
 template<class _TKey, class _TValue>
@@ -87,6 +90,16 @@ inline void HashTable<_TKey, _TValue>::insert(const _TKey& _Key, _TValue&& _Val)
 {
 	HashPair<_TKey, _TValue> pair;
 	pair.key = _Key;
+	pair.value = move(_Val);
+
+	_insert(pair);
+}
+
+template<class _TKey, class _TValue>
+inline void HashTable<_TKey, _TValue>::insert(_TKey&& _Key, _TValue&& _Val)
+{
+	HashPair<_TKey, _TValue> pair;
+	pair.key = move(_Key);
 	pair.value = move(_Val);
 
 	_insert(pair);
@@ -133,6 +146,30 @@ inline _TValue& HashTable<_TKey, _TValue>::operator[](const _TKey& _Key)
 }
 
 template<class _TKey, class _TValue>
+inline const _TValue& HashTable<_TKey, _TValue>::operator[](const _TKey& _Key) const
+{
+	return find(_Key);
+}
+
+template<class _TKey, class _TValue>
+inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(const HashTable<_TKey, _TValue>& _Table)
+{
+	_clear();
+	data = new LinkedList<HashPair<_TKey, _TValue>>* [MAX_SIZE];
+	_copy_from(_Table);
+	return *this;
+}
+
+template<class _TKey, class _TValue>
+inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable<_TKey, _TValue>&& _Table)
+{
+	_clear();
+	data = move(_Table.data);
+	_Table.data = NULL;
+	return *this;
+}
+
+template<class _TKey, class _TValue>
 inline void HashTable<_TKey, _TValue>::_insert(HashPair<_TKey, _TValue>& _Pair)
 {
 	size_t hash = Hash<_TKey>()(_Pair.key) % MAX_SIZE;
@@ -142,7 +179,22 @@ inline void HashTable<_TKey, _TValue>::_insert(HashPair<_TKey, _TValue>& _Pair)
 	data[hash]->append(move(_Pair));
 }
 
+template<class _TKey, class _TValue>
+inline void HashTable<_TKey, _TValue>::_copy_from(const HashTable<_TKey, _TValue>& _Table)
+{
+	for (int i = 0; i < MAX_SIZE; ++i) {
+		if (_Table.data[i]) {
+			data[i] = new LinkedList<HashPair<_TKey, _TValue>>();
+			*(data[i]) = *_Table.data[i];
+		}
+	}
+}
 
+template<class _TKey, class _TValue>
+inline void HashTable<_TKey, _TValue>::_clear()
+{
+	if (data) delete[] data;
+}
 
 //
 //	ITERATOR

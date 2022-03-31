@@ -58,7 +58,7 @@ private:
 	Node<_Ty>*& _search_second_half(unsigned int _Index);
 
 	void _copy_from(const LinkedList<_Ty>& _List);
-	void _clear();
+	void _destroy_data();
 };
 
 template<typename _Ty>
@@ -90,7 +90,7 @@ inline LinkedList<_Ty>::LinkedList(LinkedList<_Ty>&& _List)
 template<typename _Ty>
 inline LinkedList<_Ty>::~LinkedList()
 {
-	_clear();
+	_destroy_data();
 }
 
 template<typename _Ty>
@@ -136,6 +136,7 @@ inline void LinkedList<_Ty>::insert(_Ty&& _Val, unsigned int _Index)
 template<typename _Ty>
 inline bool LinkedList<_Ty>::remove_at(unsigned int _Index)
 {
+	// TODO: REMOVE AT INDEX FUNCTION!
 	return false;
 }
 
@@ -220,7 +221,7 @@ inline const _Ty& LinkedList<_Ty>::operator[](unsigned int _Index) const
 template<typename _Ty>
 inline LinkedList<_Ty>& LinkedList<_Ty>::operator=(const LinkedList<_Ty>& _List)
 {
-	_clear();
+	_destroy_data();
 	_copy_from(_List);
 	return *this;
 }
@@ -228,6 +229,8 @@ inline LinkedList<_Ty>& LinkedList<_Ty>::operator=(const LinkedList<_Ty>& _List)
 template<typename _Ty>
 inline LinkedList<_Ty>& LinkedList<_Ty>::operator=(LinkedList<_Ty>&& _List)
 {
+	_destroy_data();
+
 	_begin = move(_List._begin);
 	_end = move(_List._end);
 	_size = move(_List._size);
@@ -325,7 +328,7 @@ inline void LinkedList<_Ty>::_copy_from(const LinkedList<_Ty>& _List)
 }
 
 template<typename _Ty>
-inline void LinkedList<_Ty>::_clear()
+inline void LinkedList<_Ty>::_destroy_data()
 {
 	if (!_begin) return;
 	while (_begin != _end) {
@@ -366,9 +369,7 @@ private:
 template<class _Ty>
 inline LinkedListIterator<_Ty>::LinkedListIterator(Node<_Ty>* _Ptr)
 	: ptr(_Ptr)
-{
-
-}
+{ }
 
 template<class _Ty>
 inline _Ty& LinkedListIterator<_Ty>::operator*()

@@ -13,21 +13,25 @@
 #define sp <<" "
 #define nl <<_STD endl
 
+#include <unordered_map>
+
 int main()
 {
     srand(time(NULL));
     
-   // HashTable<_STD string, int> table;
+    HashTable<_STD string, HashTable<int, int>> table;
 
-   // table.insert("XD", 5);
-   // table.insert("XD1", 9);
-   // table.insert("XD2", 123);
-   // table.insert("XD3", 7);
-   // 
-   // table["XD2"] = 1111;
+    HashTable<int, int> t1;
+    t1.insert(10, 12);
+    t1.insert(8, 11);
 
-   // for (auto e : table) {
-   //     print e.key << "\t" << e.value nl;
-   //}
+    HashTable<int, int> t2;
+    t2.insert(101, 121);
+    t2.insert(81, 111);
+
+    table.insert("lol", t1);
+    table.insert("liga", t2);
+
+    print table["lol"][8] nl;
 }
 
