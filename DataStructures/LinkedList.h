@@ -47,50 +47,50 @@ public:
 	LinkedList<_Ty>& operator=(LinkedList<_Ty>&& _List);
 
 private:
-	Node<_Ty>* _begin;
-	Node<_Ty>* _end;
-	size_t _size;
+	Node<_Ty>* _Begin;
+	Node<_Ty>* _End;
+	size_t _Size;
 
-	void _append_node(Node<_Ty>*& _Node);
-	void _insert_node(Node<_Ty>*& _Node, unsigned int _Index);
-	Node<_Ty>*& _search(unsigned int _Index);
-	Node<_Ty>*& _search_first_half(unsigned int _Index);
-	Node<_Ty>*& _search_second_half(unsigned int _Index);
+	void _Append_node(Node<_Ty>*& _Node);
+	void _Insert_node(Node<_Ty>*& _Node, unsigned int _Index);
+	Node<_Ty>*& _Search(unsigned int _Index);
+	Node<_Ty>*& _Search_first_half(unsigned int _Index);
+	Node<_Ty>*& _Search_second_half(unsigned int _Index);
 
-	void _copy_from(const LinkedList<_Ty>& _List);
-	void _destroy_data();
+	void _Copy_from(const LinkedList<_Ty>& _List);
+	void _Destroy_data();
 };
 
 template<typename _Ty>
 inline LinkedList<_Ty>::LinkedList()
 {
-	_size = 0;
-	_begin = NULL;
-	_end = NULL;
+	_Size = 0;
+	_Begin = NULL;
+	_End = NULL;
 }
 
 template<typename _Ty>
 inline LinkedList<_Ty>::LinkedList(const LinkedList<_Ty>& _List)
 {
-	_copy_from(_List);
+	_Copy_from(_List);
 }
 
 template<typename _Ty>
 inline LinkedList<_Ty>::LinkedList(LinkedList<_Ty>&& _List)
 {
-	_begin = move(_List._begin);
-	_end = move(_List._end);
-	_size = move(_List._size);
+	_Begin = move(_List._Begin);
+	_End = move(_List._End);
+	_Size = move(_List._Size);
 
-	_List._begin = NULL;
-	_List._end = NULL;
-	_List._size = 0;
+	_List._Begin = NULL;
+	_List._End = NULL;
+	_List._Size = 0;
 }
 
 template<typename _Ty>
 inline LinkedList<_Ty>::~LinkedList()
 {
-	_destroy_data();
+	_Destroy_data();
 }
 
 template<typename _Ty>
@@ -99,7 +99,7 @@ inline void LinkedList<_Ty>::append(const _Ty& _Val)
 	auto node = new Node<_Ty>();
 	node->value = _Val;
 
-	_append_node(node);
+	_Append_node(node);
 }
 
 template<typename _Ty>
@@ -108,38 +108,38 @@ inline void LinkedList<_Ty>::append(_Ty&& _Val)
 	auto node = new Node<_Ty>();
 	node->value = move(_Val);
 
-	_append_node(node);
+	_Append_node(node);
 }
 
 template<typename _Ty>
 inline void LinkedList<_Ty>::insert(const _Ty& _Val, unsigned int _Index)
 {
-	if (_Index == _size) return append(_Val);
+	if (_Index == _Size) return append(_Val);
 
 	auto next = new Node<_Ty>();
 	next->value = const_cast<_Ty&>(_Val);
 
-	_insert_node(next, _Index);
+	_Insert_node(next, _Index);
 }
 
 template<typename _Ty>
 inline void LinkedList<_Ty>::insert(_Ty&& _Val, unsigned int _Index)
 {
-	if (_Index == _size) return append(move(_Val));
+	if (_Index == _Size) return append(move(_Val));
 
 	auto next = new Node<_Ty>();
 	next->value = move(_Val);
 
-	_insert_node(next, _Index);
+	_Insert_node(next, _Index);
 }
 
 template<typename _Ty>
 inline bool LinkedList<_Ty>::remove_at(unsigned int _Index)
 {
-	if (_Index == _size - 1) return pop_back();
+	if (_Index == _Size - 1) return pop_back();
 	if (_Index == 0) return pop_begin();
 
-	auto node = _search(_Index);
+	auto node = _Search(_Index);
 	auto prev = node->prev;
 	auto next = node->next;
 
@@ -148,20 +148,20 @@ inline bool LinkedList<_Ty>::remove_at(unsigned int _Index)
 	prev->next = next;
 	next->prev = prev;
 
-	--_size;
+	--_Size;
 	return true;
 }
 
 template<typename _Ty>
 inline bool LinkedList<_Ty>::pop_begin()
 {
-	if (_size > 1) {
-		auto next = _begin->next;
-		auto node = _begin;
-		node->value = NULL;
+	if (_Size > 1) {
+		auto next = _Begin->next;
+		auto node = _Begin;
+
 		delete node;
-		_begin = next;
-		--_size;
+		_Begin = next;
+		--_Size;
 		return true;
 	}
 	return pop_back();
@@ -170,133 +170,133 @@ inline bool LinkedList<_Ty>::pop_begin()
 template<typename _Ty>
 inline bool LinkedList<_Ty>::pop_back()
 {
-	if (_size > 1) {
-		auto prev = _end->prev;
-		auto node = _end;
+	if (_Size > 1) {
+		auto prev = _End->prev;
+		auto node = _End;
 		delete node;
-		_end = prev;
+		_End = prev;
 	}
-	else if (_size == 1) {
-		delete _begin;
-		_begin = NULL;
-		_end = NULL;
+	else if (_Size == 1) {
+		delete _Begin;
+		_Begin = NULL;
+		_End = NULL;
 	}
 	else {
 		return false;
 	}
-	--_size;
+	--_Size;
 	return true;
 }
 
 template<typename _Ty>
 inline LinkedListIterator<_Ty> LinkedList<_Ty>::begin()
 {
-	return LinkedListIterator<_Ty>(_begin);
+	return LinkedListIterator<_Ty>(_Begin);
 }
 
 template<typename _Ty>
 inline const LinkedListIterator<_Ty> LinkedList<_Ty>::begin() const
 {
-	return LinkedListIterator<_Ty>(_begin);
+	return LinkedListIterator<_Ty>(_Begin);
 }
 
 template<typename _Ty>
 inline LinkedListIterator<_Ty> LinkedList<_Ty>::end()
 {
-	return LinkedListIterator<_Ty>(_end->next);
+	return LinkedListIterator<_Ty>(_End->next);
 }
 
 template<typename _Ty>
 inline const LinkedListIterator<_Ty> LinkedList<_Ty>::end() const
 {
-	return LinkedListIterator<_Ty>(_end->next);
+	return LinkedListIterator<_Ty>(_End->next);
 }
 
 template<typename _Ty>
 inline size_t LinkedList<_Ty>::size() const
 {
-	return _size;
+	return _Size;
 }
 
 template<typename _Ty>
 inline _Ty& LinkedList<_Ty>::operator[](unsigned int _Index)
 {
-	return _search(_Index)->value;
+	return _Search(_Index)->value;
 }
 
 template<typename _Ty>
 inline const _Ty& LinkedList<_Ty>::operator[](unsigned int _Index) const
 {
-	return _search(_Index)->value;
+	return _Search(_Index)->value;
 }
 
 template<typename _Ty>
 inline LinkedList<_Ty>& LinkedList<_Ty>::operator=(const LinkedList<_Ty>& _List)
 {
-	_destroy_data();
-	_copy_from(_List);
+	_Destroy_data();
+	_Copy_from(_List);
 	return *this;
 }
 
 template<typename _Ty>
 inline LinkedList<_Ty>& LinkedList<_Ty>::operator=(LinkedList<_Ty>&& _List)
 {
-	_destroy_data();
+	_Destroy_data();
 
-	_begin = move(_List._begin);
-	_end = move(_List._end);
-	_size = move(_List._size);
+	_Begin = move(_List._Begin);
+	_End = move(_List._End);
+	_Size = move(_List._Size);
 
-	_List._begin = NULL;
-	_List._end = NULL;
-	_List._size = 0;
+	_List._Begin = NULL;
+	_List._End = NULL;
+	_List._Size = 0;
 	return *this;
 }
 
 
 template<typename _Ty>
-inline void LinkedList<_Ty>::_append_node(Node<_Ty>*& _Node)
+inline void LinkedList<_Ty>::_Append_node(Node<_Ty>*& _Node)
 {
-	if (_size == 0) {
-		_begin = _Node;
-		_end = _Node;
+	if (_Size == 0) {
+		_Begin = _Node;
+		_End = _Node;
 	}
 	else {
-		_end->next = _Node;
-		_Node->prev = _end;
+		_End->next = _Node;
+		_Node->prev = _End;
 
-		_end = _Node;
+		_End = _Node;
 	}
-	++_size;
+	++_Size;
 }
 
 template<typename _Ty>
-inline void LinkedList<_Ty>::_insert_node(Node<_Ty>*& _Node, unsigned int _Index)
+inline void LinkedList<_Ty>::_Insert_node(Node<_Ty>*& _Node, unsigned int _Index)
 {
-	Node<_Ty>* node = _search(_Index);
+	Node<_Ty>* node = _Search(_Index);
 
 	auto prev = node->prev;
 	node->prev = _Node;
 	_Node->next = node;
 	_Node->prev = prev;
 
-	if (_Index == 0) _begin = _Node;
+	if (_Index == 0) _Begin = _Node;
 	else _Node->prev->next = _Node;
 
-	++_size;
+	++_Size;
 }
 
 template<typename _Ty>
-inline Node<_Ty>*& LinkedList<_Ty>::_search(unsigned int _Index)
+inline Node<_Ty>*& LinkedList<_Ty>::_Search(unsigned int _Index)
 {
-	if (_Index <= _size / 2) return _search_first_half(_Index);
-	return _search_second_half(_Index);
+	if (_Index <= _Size / 2) return _Search_first_half(_Index);
+	return _Search_second_half(_Index);
 }
 
 template<typename _Ty>
-inline Node<_Ty>*& LinkedList<_Ty>::_search_first_half(unsigned int _Index)
+inline Node<_Ty>*& LinkedList<_Ty>::_Search_first_half(unsigned int _Index)
 {
-	Node<_Ty>* tmp = _begin;
+	Node<_Ty>* tmp = _Begin;
 	for (int i = 0; i < _Index; ++i) {
 		tmp = tmp->next;
 	}
@@ -304,29 +304,29 @@ inline Node<_Ty>*& LinkedList<_Ty>::_search_first_half(unsigned int _Index)
 }
 
 template<typename _Ty>
-inline Node<_Ty>*& LinkedList<_Ty>::_search_second_half(unsigned int _Index)
+inline Node<_Ty>*& LinkedList<_Ty>::_Search_second_half(unsigned int _Index)
 {
-	Node<_Ty>* tmp = _end;
-	for (int i = _size; i > _Index + 1; --i) {
+	Node<_Ty>* tmp = _End;
+	for (int i = _Size; i > _Index + 1; --i) {
 		tmp = tmp->prev;
 	}
 	return tmp;
 }
 
 template<typename _Ty>
-inline void LinkedList<_Ty>::_copy_from(const LinkedList<_Ty>& _List)
+inline void LinkedList<_Ty>::_Copy_from(const LinkedList<_Ty>& _List)
 {
-	if (_List._size == 0) {
-		_size = 0;
-		_begin = NULL;
-		_end = NULL;
+	if (_List._Size == 0) {
+		_Size = 0;
+		_Begin = NULL;
+		_End = NULL;
 		return;
 	}
 
 	auto it = _List.begin();
-	_begin = new Node<_Ty>();
-	_begin->value = *it;
-	auto tmp = _begin;
+	_Begin = new Node<_Ty>();
+	_Begin->value = *it;
+	auto tmp = _Begin;
 
 	while (++it != _List.end()) {
 		auto node = new Node<_Ty>();
@@ -335,23 +335,24 @@ inline void LinkedList<_Ty>::_copy_from(const LinkedList<_Ty>& _List)
 		tmp->next = node;
 		tmp = tmp->next;
 	}
-	_end = tmp;
-	_size = _List._size;
+	_End = tmp;
+	_Size = _List._Size;
 }
 
 template<typename _Ty>
-inline void LinkedList<_Ty>::_destroy_data()
+inline void LinkedList<_Ty>::_Destroy_data()
 {
-	if (!_begin) return;
-	while (_begin != _end) {
-		auto tmp = _end->prev;
+	if (!_Begin) return;
+	while (_Begin != _End) {
+		auto tmp = _End->prev;
 		tmp->next = NULL;
-		delete _end;
-		_end = tmp;
+		delete _End;
+		_End = tmp;
 	}
-	delete _begin;
-	_begin = NULL;
-	_end = NULL;
+
+	delete _Begin;
+	_Begin = NULL;
+	_End = NULL;
 }
 
 
