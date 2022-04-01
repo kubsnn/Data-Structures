@@ -15,23 +15,32 @@
 
 #include <unordered_map>
 
+#define map _STD unordered_map
+
 int main()
 {
-    srand(time(NULL));
-    
-    HashTable<_STD string, HashTable<int, int>> table;
+    //srand(time(NULL));
+    HashTable<int, HashTable<int, int>> table;
+    clock_t begin = clock();
 
-    HashTable<int, int> t1;
-    t1.insert(10, 12);
-    t1.insert(8, 11);
+    for (int i = 0; i < 1000; ++i) {
 
-    HashTable<int, int> t2;
-    t2.insert(101, 121);
-    t2.insert(81, 111);
+        for (int j = 0; j < 500; ++j) {
+            HashTable<int, int> t;
+            for (int k = 0; k < 700; ++k) {
+                t.insert(k, i + k + j);
+            }
+            table.insert(j, move(t));
+        }
 
-    table.insert("lol", t1);
-    table.insert("liga", t2);
+        for (int j = 0; j < 500; ++j) {
+            table.remove(j);
+        }
 
-    print table["lol"][8] nl;
+        if (i % 100 == 0) print i nl;
+    }
+    clock_t end = clock();
+
+    print end - begin << "ms" nl;
 }
 

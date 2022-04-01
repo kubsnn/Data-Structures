@@ -4,37 +4,36 @@
 template<typename T>
 struct Hash
 {
-	virtual size_t operator()(const T& item, int iteration = 1) = delete;
+	virtual size_t operator()(const T& item) = delete;
 };
 
 template<>
 struct Hash<int>
 {
-	size_t operator()(const int& i, int iteration = 1) const
+	static constexpr const size_t _Mask = -1;
+	static constexpr const size_t _Magic = _Mask ^ 2763427254;
+
+	size_t operator()(const int& i) const
 	{
-		int x = i + iteration;
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = (x >> 16) ^ x;
-		return x;
+		return i * _Magic;
 	}
 };
 
 template<>
 struct Hash<char>
 {
-	inline size_t operator()(const char& c, int iteration = 1) const
+	inline size_t operator()(const char& c) const
 	{
-		return Hash<int>()(c, iteration);
+		return Hash<int>()(c);
 	}
 };
 
 template<>
 struct Hash<long long>
 {
-	size_t operator()(const long long& ll, int iteration = 1) const
+	size_t operator()(const long long& ll) const
 	{
-		unsigned long long x = ll + iteration;
+		unsigned long long x = ll;
 		x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull;
 		x = (x ^ (x >> 27)) * 0x94d049bb133111ebull;
 		x = x ^ (x >> 31);
@@ -45,17 +44,16 @@ struct Hash<long long>
 template<>
 struct Hash<double>
 {
-	inline size_t operator()(const double& d, int iteration = 1) const
+	inline size_t operator()(const double& d) const
 	{
-		double x = d + iteration;
-		return Hash<long long>()(*(size_t*)&x, iteration);
+		return Hash<long long>()(*(size_t*)&d);
 	}
 };
 
 template<>
 struct Hash<std::string>
 {
-	size_t operator()(const std::string& s, int iteration = 1) const
+	size_t operator()(const std::string& s) const
 	{
 		size_t sum = 1;
 		size_t n = s.length();
@@ -63,7 +61,7 @@ struct Hash<std::string>
 		const size_t MOD = 1e9 + 7;
 
 		for (int i = 0; i < n; ++i) {
-			sum = (sum + (size_t)(s[i] + iteration) * power) % MOD;
+			sum = (sum + (size_t)(s[i]) * power) % MOD;
 			power = (power * 31) % MOD;
 		}
 		return sum;
