@@ -33,12 +33,18 @@ public:
 	bool pop_begin();
 	bool pop_back();
 
+
 	LinkedListIterator<_Ty> begin();
 	const LinkedListIterator<_Ty> begin() const;
 	LinkedListIterator<_Ty> end();
 	const LinkedListIterator<_Ty> end() const;
 
 	size_t size() const;
+
+	_Ty& back();
+	const _Ty& back() const;
+	_Ty& front();
+	const _Ty& front() const;
 
 	_Ty& operator[](unsigned int _Index);
 	const _Ty& operator[](unsigned int _Index) const;
@@ -219,6 +225,30 @@ inline size_t LinkedList<_Ty>::size() const
 }
 
 template<typename _Ty>
+inline _Ty& LinkedList<_Ty>::back()
+{
+	return _End->value;
+}
+
+template<typename _Ty>
+inline const _Ty& LinkedList<_Ty>::back() const
+{
+	return _End->value;
+}
+
+template<typename _Ty>
+inline _Ty& LinkedList<_Ty>::front()
+{
+	return _Begin->value;
+}
+
+template<typename _Ty>
+inline const _Ty& LinkedList<_Ty>::front() const
+{
+	return _Begin->value;
+}
+
+template<typename _Ty>
 inline _Ty& LinkedList<_Ty>::operator[](unsigned int _Index)
 {
 	return _Search(_Index)->value;
@@ -273,11 +303,11 @@ inline void LinkedList<_Ty>::_Append_node(Node<_Ty>*& _Node)
 template<typename _Ty>
 inline void LinkedList<_Ty>::_Insert_node(Node<_Ty>*& _Node, unsigned int _Index)
 {
-	Node<_Ty>* node = _Search(_Index);
+	Node<_Ty>* _Tmp = _Search(_Index);
 
-	auto prev = node->prev;
-	node->prev = _Node;
-	_Node->next = node;
+	auto prev = _Tmp->prev;
+	_Tmp->prev = _Node;
+	_Node->next = _Tmp;
 	_Node->prev = prev;
 
 	if (_Index == 0) _Begin = _Node;
@@ -296,21 +326,21 @@ inline Node<_Ty>*& LinkedList<_Ty>::_Search(unsigned int _Index)
 template<typename _Ty>
 inline Node<_Ty>*& LinkedList<_Ty>::_Search_first_half(unsigned int _Index)
 {
-	Node<_Ty>* tmp = _Begin;
+	Node<_Ty>* _Tmp = _Begin;
 	for (int i = 0; i < _Index; ++i) {
-		tmp = tmp->next;
+		_Tmp = _Tmp->next;
 	}
-	return tmp;
+	return _Tmp;
 }
 
 template<typename _Ty>
 inline Node<_Ty>*& LinkedList<_Ty>::_Search_second_half(unsigned int _Index)
 {
-	Node<_Ty>* tmp = _End;
+	Node<_Ty>* _Tmp = _End;
 	for (int i = _Size; i > _Index + 1; --i) {
-		tmp = tmp->prev;
+		_Tmp = _Tmp->prev;
 	}
-	return tmp;
+	return _Tmp;
 }
 
 template<typename _Ty>
@@ -326,16 +356,16 @@ inline void LinkedList<_Ty>::_Copy_from(const LinkedList<_Ty>& _List)
 	auto it = _List.begin();
 	_Begin = new Node<_Ty>();
 	_Begin->value = *it;
-	auto tmp = _Begin;
+	auto _Tmp = _Begin;
 
 	while (++it != _List.end()) {
 		auto node = new Node<_Ty>();
 		node->value = *it;
-		node->prev = tmp;
-		tmp->next = node;
-		tmp = tmp->next;
+		node->prev = _Tmp;
+		_Tmp->next = node;
+		_Tmp = _Tmp->next;
 	}
-	_End = tmp;
+	_End = _Tmp;
 	_Size = _List._Size;
 }
 
@@ -344,10 +374,10 @@ inline void LinkedList<_Ty>::_Destroy_data()
 {
 	if (!_Begin) return;
 	while (_Begin != _End) {
-		auto tmp = _End->prev;
-		tmp->next = NULL;
+		auto _Tmp = _End->prev;
+		_Tmp->next = NULL;
 		delete _End;
-		_End = tmp;
+		_End = _Tmp;
 	}
 
 	delete _Begin;
@@ -376,43 +406,43 @@ public:
 	bool operator!=(const LinkedListIterator<_Ty>& _Right);
 private:
 
-	Node<_Ty>* ptr;
+	Node<_Ty>* _List;
 };
 
 template<class _Ty>
 inline LinkedListIterator<_Ty>::LinkedListIterator(Node<_Ty>* _Ptr)
-	: ptr(_Ptr)
+	: _List(_Ptr)
 { }
 
 template<class _Ty>
 inline _Ty& LinkedListIterator<_Ty>::operator*()
 {
-	return this->ptr->value;
+	return this->_List->value;
 }
 
 template<class _Ty>
 inline LinkedListIterator<_Ty>& LinkedListIterator<_Ty>::operator++()
 {
-	ptr = ptr->next;
+	_List = _List->next;
 	return *this;
 }
 
 template<class _Ty>
 inline LinkedListIterator<_Ty> LinkedListIterator<_Ty>::operator++(int)
 {
-	auto p = ptr;
-	ptr = ptr->next;
+	auto p = _List;
+	_List = _List->next;
 	return *p;
 }
 
 template<class _Ty>
 inline bool LinkedListIterator<_Ty>::operator==(const LinkedListIterator<_Ty>& _Right)
 {
-	return ptr == _Right.ptr;
+	return _List == _Right._List;
 }
 
 template<class _Ty>
 inline bool LinkedListIterator<_Ty>::operator!=(const LinkedListIterator<_Ty>& _Right)
 {
-	return ptr != _Right.ptr;
+	return _List != _Right._List;
 }
