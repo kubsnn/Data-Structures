@@ -2,6 +2,16 @@
 
 #include "Hash.h"
 
+#ifdef _WIN64
+typedef unsigned __int64 size_t;
+typedef __int64          ptrdiff_t;
+typedef __int64          intptr_t;
+#else
+typedef unsigned int     size_t;
+typedef int              ptrdiff_t;
+typedef int              intptr_t;
+#endif
+
 template<class _Ty1, class _Ty2>
 struct Pair
 {
@@ -45,9 +55,9 @@ inline _Ty&& move(_Ty& _Arg)
 template<class _Ty>
 inline void swap(_Ty& _Left, _Ty& _Right)
 {
-	_Ty tmp(move(_Right));
+	_Ty _Tmp(move(_Right));
 	_Right = move(_Left);
-	_Left = move(tmp);
+	_Left = move(_Tmp);
 }
 
 template<class _FwdIt, class _Ty>
@@ -60,10 +70,37 @@ inline void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val)
 }
 
 template<class _FwdIt, class _Ty>
-inline void fill_n(const _FwdIt _First, size_t _Count, const _Ty& _Val)
+constexpr inline void fill_n(const _FwdIt _First, size_t _Count, const _Ty& _Val)
 {
 	auto _UFirst = const_cast<_FwdIt>(_First);
 	for (size_t i = 0; i < _Count; ++i) {
 		*(_UFirst++) = _Val;
+	}
+}
+
+template<class _InIt, class _OutIt>
+inline void copy(_InIt _First, _InIt _Last, _OutIt _Dest)
+{
+	for (; _First != _Last; ++_First, ++_Dest) {
+		*_Dest = *_First;
+	}
+}
+
+template<class _InIt, class _OutIt>
+inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count)
+{
+	if (_Src == _Dst) return;
+	if (_Src > _Dst) {
+		for (int i = 0; i < _Count; ++i) {
+			*_Dst = move(*_Src);
+			++_Dst; ++_Src;
+		}
+	} else {
+		_InIt _RSrc = _Src + _Count - 1;
+		_OutIt _RDst = _Dst + _Count - 1;
+		for (int i = 0; i < _Count; ++i) {
+			*_RDst = move(*_RSrc);
+			--_RDst; --_RSrc;
+		}
 	}
 }
