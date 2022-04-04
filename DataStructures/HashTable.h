@@ -10,7 +10,6 @@ template<class _TKey, class _TValue>
 struct HashTableIterator;
 
 
-
 template<class _TKey, class _TValue>
 class HashTable
 {
@@ -40,6 +39,7 @@ public:
 
 	HashTable<_TKey, _TValue>& operator=(const HashTable<_TKey, _TValue>& _Table);
 	HashTable<_TKey, _TValue>& operator=(HashTable<_TKey, _TValue>&& _Table);
+
 private:
 	size_t _Count = 0;
 	size_t _BucketCount = 8;
@@ -257,8 +257,8 @@ inline void HashTable<_TKey, _TValue>::_Rehash(size_t _NewSize)
 
 	for (int i = 0; i < _OldSize; ++i) {
 		if (_Prev_buckets[i]) {
-			for (auto& e : *_Prev_buckets[i]) {
-				_Insert(e);
+			for (auto& _El : *_Prev_buckets[i]) {
+				_Insert(_El);
 			}
 			delete _Prev_buckets[i];
 			_Prev_buckets[i] = NULL;
@@ -332,20 +332,20 @@ public:
 	bool operator==(const HashTableIterator<_TKey, _TValue>& _Right);
 	bool operator!=(const HashTableIterator<_TKey, _TValue>& _Right);
 private:
-	LinkedList<HashPair<_TKey, _TValue>>** ptr;
-	int left;
-	int tmp = 0;
+	LinkedList<HashPair<_TKey, _TValue>>** _List;
+	int _BucketsLeft;
+	int _CurrentBucketIndex = 0;
 
 	void find_next_value();
 };
 
 template<class _TKey, class _TValue>
 inline HashTableIterator<_TKey, _TValue>::HashTableIterator(LinkedList<HashPair<_TKey, _TValue>>** _List, size_t _Size)
-	: ptr(_List)
+	: _List(_List)
 {
-	left = (int)_Size;
-	if (left > 0 && !*ptr) {
-		tmp = -1;
+	_BucketsLeft = (int)_Size;
+	if (_BucketsLeft > 0 && !*_List) {
+		_CurrentBucketIndex = -1;
 		find_next_value();
 	}
 }
@@ -353,7 +353,7 @@ inline HashTableIterator<_TKey, _TValue>::HashTableIterator(LinkedList<HashPair<
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>& HashTableIterator<_TKey, _TValue>::operator*()
 {
-	return (*ptr)->operator[](tmp);
+	return (*_List)->operator[](_CurrentBucketIndex);
 }
 
 template<class _TKey, class _TValue>
@@ -366,7 +366,7 @@ inline HashTableIterator<_TKey, _TValue>& HashTableIterator<_TKey, _TValue>::ope
 template<class _TKey, class _TValue>
 inline HashTableIterator<_TKey, _TValue> HashTableIterator<_TKey, _TValue>::operator++(int)
 {
-	auto p = ptr;
+	auto p = _List;
 	find_next_value();
 	return *p;
 }
@@ -374,35 +374,35 @@ inline HashTableIterator<_TKey, _TValue> HashTableIterator<_TKey, _TValue>::oper
 template<class _TKey, class _TValue>
 inline bool HashTableIterator<_TKey, _TValue>::operator==(const HashTableIterator<_TKey, _TValue>& _Right)
 {
-	return ptr == _Right.ptr;
+	return _List == _Right._List;
 }
 
 template<class _TKey, class _TValue>
 inline bool HashTableIterator<_TKey, _TValue>::operator!=(const HashTableIterator<_TKey, _TValue>& _Right)
 {
-	return ptr != _Right.ptr;
+	return _List != _Right._List;
 }
 
 template<class _TKey, class _TValue>
 void HashTableIterator<_TKey, _TValue>::find_next_value()
 {
-	while (*ptr == NULL) {
-		if (left == 0) return;
-		--left;
-		++ptr;
+	while (*_List == NULL) {
+		if (_BucketsLeft == 0) return;
+		--_BucketsLeft;
+		++_List;
 	}
-	if (left <= 0) return;
+	if (_BucketsLeft <= 0) return;
 
-	int bucket_size = (*ptr)->size();
+	int bucket_size = (*_List)->size();
 
-	if (tmp + 1 < bucket_size) {
-		tmp++;
+	if (_CurrentBucketIndex + 1 < bucket_size) {
+		_CurrentBucketIndex++;
 		return;
 	}
 
-	left--;
-	tmp = -1;
-	++ptr;
+	--_BucketsLeft;
+	_CurrentBucketIndex = -1;
+	++_List;
 	find_next_value();
 }
 
@@ -415,8 +415,8 @@ struct Hash<HashTable<_TKey, _TValue>>
 		size_t power = 1;
 		const int mod = 1e9 + 7;
 		for (const auto& e : _Table) {
-			hash += (Hash<_TKey>()(e.key) * power) % mod;
-			hash += (Hash<_TValue>()(e.value) * power) % mod;
+			hash = (hash + Hash<_TKey>()(e.key) * power) % mod;
+			hash = (hash + Hash<_TValue>()(e.value) * power) % mod;
 
 			power = (power * 31) % mod;
 		}
