@@ -142,11 +142,13 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Array.h" />
     <ClInclude Include="Hash.h" />
     <ClInclude Include="HashPair.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
