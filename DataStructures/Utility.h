@@ -90,7 +90,7 @@ template<class _InIt, class _OutIt>
 inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count)
 {
 	if (_Src == _Dst) return;
-	if constexpr (_Src > _Dst) {
+	if (_Src > _Dst) {
 		for (int i = 0; i < _Count; ++i) {
 			*_Dst = move(*_Src);
 			++_Dst; ++_Src;

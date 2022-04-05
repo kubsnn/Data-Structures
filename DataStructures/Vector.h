@@ -22,10 +22,10 @@ public:
 
 	constexpr size_t size() const;
 
-	_Ty* begin();
-	const _Ty* begin() const;
-	_Ty* end();
-	const _Ty* end() const;
+	constexpr _Ty* begin();
+	constexpr const _Ty* begin() const;
+	constexpr _Ty* end();
+	constexpr const _Ty* end() const;
 
 	void clear();
 
@@ -36,6 +36,8 @@ public:
 	Vector<_Ty>& operator=(Vector<_Ty>&& _Vec);
 
 	bool operator==(const Vector<_Ty>& _Vec) const;
+	bool operator!=(const Vector<_Ty>& _Vec) const;
+	
 
 private:
 	size_t _MaxSize = 8;
@@ -52,6 +54,7 @@ private:
 template<class _Ty>
 inline Vector<_Ty>::Vector()
 {
+	_MaxSize = 8;
 	_Data = new _Ty[_MaxSize];
 }
 
@@ -109,7 +112,7 @@ inline void Vector<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
 	++_Size;
 	_Try_resize(_Get_new_size());
-	move_mem(Data + _Index, _Data + Index + 1, _Size - _Index);
+	move_mem(_Data + _Index, _Data + _Index + 1, _Size - _Index);
 	_Data[_Index] = _Val;
 }
 
@@ -118,7 +121,7 @@ inline void Vector<_Ty>::insert(unsigned int _Index, _Ty&& _Val)
 {
 	++_Size;
 	_Try_resize(_Get_new_size());
-	move_mem(Data + _Index, _Data + Index + 1, _Size - _Index);
+	move_mem(_Data + _Index, _Data + _Index + 1, _Size - _Index);
 	_Data[_Index] = move(_Val);
 }
 
@@ -137,25 +140,25 @@ inline constexpr size_t Vector<_Ty>::size() const
 }
 
 template<class _Ty>
-inline _Ty* Vector<_Ty>::begin()
+inline constexpr _Ty* Vector<_Ty>::begin()
 {
 	return _Data;
 }
 
 template<class _Ty>
-inline const _Ty* Vector<_Ty>::begin() const
+inline constexpr const _Ty* Vector<_Ty>::begin() const
 {
 	return _Data;
 }
 
 template<class _Ty>
-inline _Ty* Vector<_Ty>::end()
+inline constexpr _Ty* Vector<_Ty>::end()
 {
 	return _Data + _Size;
 }
 
 template<class _Ty>
-inline const _Ty* Vector<_Ty>::end() const
+inline constexpr const _Ty* Vector<_Ty>::end() const
 {
 	return _Data + _Size;
 }
@@ -210,6 +213,12 @@ inline bool Vector<_Ty>::operator==(const Vector<_Ty>& _Vec) const
 		if (_Data[i] != _Vec._Data[i]) return false;
 	}
 	return true;
+}
+
+template<class _Ty>
+inline bool Vector<_Ty>::operator!=(const Vector<_Ty>& _Vec) const
+{
+	return !(*this == _Vec);
 }
 
 template<class _Ty>
