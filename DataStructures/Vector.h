@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Utility.h"
-#include <cstdlib>
 
 template<class _Ty>
 class Vector
@@ -15,13 +14,26 @@ public:
 	void append(const _Ty& _Val);
 	void append(_Ty&& _Val);
 
+	void insert(unsigned int _Index, const _Ty& _Val);
+	void insert(unsigned int _Index, _Ty&& _Val);
+
 	void remove_at(unsigned int _Index);
+
+	constexpr size_t size() const;
+
+	_Ty* begin();
+	const _Ty* begin() const;
+	_Ty* end();
+	const _Ty* end() const;
+
 
 	_Ty& operator[](unsigned int _Index);
 	const _Ty& operator[](unsigned int _Index) const;
 
 	Vector<_Ty>& operator=(const Vector<_Ty>& _Vec);
 	Vector<_Ty>& operator=(Vector<_Ty>&& _Vec);
+
+	bool operator==(const Vector<_Ty>& _Vec) const;
 
 private:
 	size_t _MaxSize = 8;
@@ -84,11 +96,59 @@ inline void Vector<_Ty>::append(_Ty&& _Val)
 }
 
 template<class _Ty>
+inline void Vector<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
+{
+	++_Size;
+	_Try_resize(_Get_new_size());
+	move_mem(Data + _Index, _Data + Index + 1, _Size - _Index);
+	_Data[_Index] = _Val;
+}
+
+template<class _Ty>
+inline void Vector<_Ty>::insert(unsigned int _Index, _Ty&& _Val)
+{
+	++_Size;
+	_Try_resize(_Get_new_size());
+	move_mem(Data + _Index, _Data + Index + 1, _Size - _Index);
+	_Data[_Index] = move(_Val);
+}
+
+template<class _Ty>
 inline void Vector<_Ty>::remove_at(unsigned int _Index)
 {
 	--_Size;
 	move_mem(_Data + _Index + 1, _Data + _Index, _Size - _Index);
 	_Try_resize(_Get_new_size_2());
+}
+
+template<class _Ty>
+inline constexpr size_t Vector<_Ty>::size() const
+{
+	return _Size;
+}
+
+template<class _Ty>
+inline _Ty* Vector<_Ty>::begin()
+{
+	return _Data;
+}
+
+template<class _Ty>
+inline const _Ty* Vector<_Ty>::begin() const
+{
+	return _Data;
+}
+
+template<class _Ty>
+inline _Ty* Vector<_Ty>::end()
+{
+	return _Data + _Size;
+}
+
+template<class _Ty>
+inline const _Ty* Vector<_Ty>::end() const
+{
+	return _Data + _Size;
 }
 
 template<class _Ty>
@@ -123,6 +183,16 @@ inline Vector<_Ty>& Vector<_Ty>::operator=(Vector<_Ty>&& _Vec)
 	_Vec._Size = 0;
 	_Vec._MaxSize = 0;
 	return *this;
+}
+
+template<class _Ty>
+inline bool Vector<_Ty>::operator==(const Vector<_Ty>& _Vec) const
+{
+	if (_Size != _Vec._Size) return false;
+	for (int i = 0; i < _Size; ++i) {
+		if (_Data[i] != _Vec._Data[i]) return false;
+	}
+	return true;
 }
 
 template<class _Ty>
