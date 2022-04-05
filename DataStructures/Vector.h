@@ -7,6 +7,7 @@ class Vector
 {
 public:
 	Vector();
+	Vector(size_t _Size);
 	Vector(const Vector<_Ty>& _Vec);
 	Vector(Vector<_Ty>&& _Vec);
 	~Vector();
@@ -26,6 +27,7 @@ public:
 	_Ty* end();
 	const _Ty* end() const;
 
+	void clear();
 
 	_Ty& operator[](unsigned int _Index);
 	const _Ty& operator[](unsigned int _Index) const;
@@ -50,6 +52,13 @@ private:
 template<class _Ty>
 inline Vector<_Ty>::Vector()
 {
+	_Data = new _Ty[_MaxSize];
+}
+
+template<class _Ty>
+inline Vector<_Ty>::Vector(size_t _Size)
+{
+	_MaxSize = nearest_bigger_power_of_2(_Size);
 	_Data = new _Ty[_MaxSize];
 }
 
@@ -149,6 +158,14 @@ template<class _Ty>
 inline const _Ty* Vector<_Ty>::end() const
 {
 	return _Data + _Size;
+}
+
+template<class _Ty>
+inline void Vector<_Ty>::clear()
+{
+	_Clear();
+	_MaxSize = 8;
+	_Data = new _Ty[_MaxSize];
 }
 
 template<class _Ty>

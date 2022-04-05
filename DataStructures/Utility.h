@@ -90,7 +90,7 @@ template<class _InIt, class _OutIt>
 inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count)
 {
 	if (_Src == _Dst) return;
-	if (_Src > _Dst) {
+	if constexpr (_Src > _Dst) {
 		for (int i = 0; i < _Count; ++i) {
 			*_Dst = move(*_Src);
 			++_Dst; ++_Src;
@@ -103,4 +103,12 @@ inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count)
 			--_RDst; --_RSrc;
 		}
 	}
+}
+
+template<class _Ty>
+inline constexpr _Ty nearest_bigger_power_of_2(const _Ty& _Val)
+{
+	int _Pow = 1;
+	while (_Pow < _Val) _Pow >>= 1;
+	return _Pow;
 }
