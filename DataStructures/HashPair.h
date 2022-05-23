@@ -18,6 +18,7 @@ struct HashPair
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair()
+	: key(_TKey{}), value(_TValue{})
 {
 }
 

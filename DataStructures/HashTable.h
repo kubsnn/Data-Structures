@@ -38,7 +38,7 @@ public:
 	const _TValue& operator[](const _TKey& _Key) const;
 
 	HashTable<_TKey, _TValue>& operator=(const HashTable<_TKey, _TValue>& _Table);
-	HashTable<_TKey, _TValue>& operator=(HashTable<_TKey, _TValue>&& _Table);
+	HashTable<_TKey, _TValue>& operator=(HashTable<_TKey, _TValue>&& _Table) noexcept;
 
 private:
 	size_t _Count = 0;
@@ -198,13 +198,13 @@ template<class _TKey, class _TValue>
 inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(const HashTable<_TKey, _TValue>& _Table)
 {
 	_Clear();
-	_Buckets = new LinkedList<HashPair<_TKey, _TValue>>* [_BucketCount];
+	_Buckets = new LinkedList<HashPair<_TKey, _TValue>>* [_Table._BucketCount];
 	_Copy_from(_Table);
 	return *this;
 }
 
 template<class _TKey, class _TValue>
-inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable<_TKey, _TValue>&& _Table)
+inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable<_TKey, _TValue>&& _Table) noexcept
 {
 	_Clear();
 	_BucketCount = move(_Table._BucketCount);
@@ -239,7 +239,7 @@ inline void HashTable<_TKey, _TValue>::_Try_resize()
 	if (_Count > 2 * _BucketCount) _Rehash(_Bigger_size);
 
 	auto _Smaller_size = _Get_shrinked_size();
-	if (_Count < _Smaller_size) _Rehash(_Smaller_size);
+	if (_Count > 8 && _Count < _Smaller_size) _Rehash(_Smaller_size);
 }
 
 template<class _TKey, class _TValue>
@@ -258,7 +258,8 @@ inline void HashTable<_TKey, _TValue>::_Rehash(size_t _NewSize)
 	for (int i = 0; i < _OldSize; ++i) {
 		if (_Prev_buckets[i]) {
 			for (auto& _El : *_Prev_buckets[i]) {
-				_Insert(_El);
+				auto _New_pair = move(_El);
+				_Insert(_New_pair);
 			}
 			delete _Prev_buckets[i];
 			_Prev_buckets[i] = NULL;
