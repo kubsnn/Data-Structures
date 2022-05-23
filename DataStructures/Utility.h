@@ -61,7 +61,7 @@ inline void swap(_Ty& _Left, _Ty& _Right)
 }
 
 template<class _FwdIt, class _Ty>
-inline void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val)
+inline constexpr void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val)
 {
 	auto _UFirst = const_cast<_FwdIt>(_First);
 	for (; _UFirst != _Last; ++_UFirst) {
@@ -70,7 +70,7 @@ inline void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val)
 }
 
 template<class _FwdIt, class _Ty>
-constexpr inline void fill_n(const _FwdIt _First, size_t _Count, const _Ty& _Val)
+inline constexpr void fill_n(const _FwdIt _First, size_t _Count, const _Ty& _Val)
 {
 	auto _UFirst = const_cast<_FwdIt>(_First);
 	for (size_t i = 0; i < _Count; ++i) {
@@ -109,6 +109,6 @@ template<class _Ty>
 inline constexpr _Ty nearest_bigger_power_of_2(const _Ty& _Val)
 {
 	int _Pow = 1;
-	while (_Pow < _Val) _Pow >>= 1;
+	while (_Pow < _Val) _Pow <<= 1;
 	return _Pow;
 }
