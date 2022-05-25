@@ -8,6 +8,7 @@ class Vector
 public:
 	Vector();
 	Vector(size_t _Size);
+	Vector(size_t _Size, const _Ty& _Val);
 	Vector(const Vector<_Ty>& _Vec);
 	Vector(Vector<_Ty>&& _Vec);
 	~Vector();
@@ -15,8 +16,14 @@ public:
 	void append(const _Ty& _Val);
 	void append(_Ty&& _Val);
 
+	template<class ...Args>
+	void emplace_back(Args&&... args);
+	void append(const Vector<_Ty>& _Vec);
+	void append(Vector<_Ty>&& _Vec);
+
 	void insert(unsigned int _Index, const _Ty& _Val);
 	void insert(unsigned int _Index, _Ty&& _Val);
+
 
 	void remove_at(unsigned int _Index);
 
@@ -33,11 +40,14 @@ public:
 	const _Ty& operator[](unsigned int _Index) const;
 
 	Vector<_Ty>& operator=(const Vector<_Ty>& _Vec);
-	Vector<_Ty>& operator=(Vector<_Ty>&& _Vec);
+	Vector<_Ty>& operator=(Vector<_Ty>&& _Vec) noexcept;
 
 	bool operator==(const Vector<_Ty>& _Vec) const;
-	bool operator!=(const Vector<_Ty>& _Vec) const;
-	
+	constexpr bool operator!=(const Vector<_Ty>& _Vec) const;
+	bool operator<(const Vector<_Ty>& _Vec) const;
+	constexpr bool operator<=(const Vector<_Ty>& _Vec) const;
+	bool operator>(const Vector<_Ty>& _Vec) const;
+	constexpr bool operator>=(const Vector<_Ty>& _Vec) const;
 
 private:
 	size_t _MaxSize = 8;
@@ -63,6 +73,14 @@ inline Vector<_Ty>::Vector(size_t _Size)
 {
 	_MaxSize = nearest_bigger_power_of_2(_Size);
 	_Data = new _Ty[_MaxSize];
+}
+
+template<class _Ty>
+inline Vector<_Ty>::Vector(size_t _Size, const _Ty& _Val)
+{
+	_MaxSize = nearest_bigger_power_of_2(_Size);
+	_Data = new _Ty[_MaxSize];
+	::fill(_Data, _Data + _Size, _Val);
 }
 
 template<class _Ty>
@@ -108,6 +126,38 @@ inline void Vector<_Ty>::append(_Ty&& _Val)
 }
 
 template<class _Ty>
+inline void Vector<_Ty>::append(const Vector<_Ty>& _Vec)
+{
+	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
+
+	copy(_Vec._Data, _Vec._Data + _Vec._Size, _Data + _Size);
+	_Size += _Vec._Size;
+}
+
+template<class _Ty>
+inline void Vector<_Ty>::append(Vector<_Ty>&& _Vec)
+{
+	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
+
+	move_mem(_Vec._Data, _Data + _Size, _Vec._Size);
+	_Size += _Vec._Size;
+
+	_Vec._Data = NULL;
+	_Vec._Size = 0;
+	_Vec._MaxSize = 0;
+}
+
+template<class _Ty>
+template<class ...Args>
+inline void Vector<_Ty>::emplace_back(Args&&... args)
+{
+	++_Size;
+	_Try_resize(_Get_new_size());
+
+	new(&_Data[_Size - 1]) _Ty(forward(args)...);
+}
+
+template<class _Ty>
 inline void Vector<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
 	++_Size;
@@ -129,6 +179,7 @@ template<class _Ty>
 inline void Vector<_Ty>::remove_at(unsigned int _Index)
 {
 	--_Size;
+	_Data[_Index].~_Ty();
 	move_mem(_Data + _Index + 1, _Data + _Index, _Size - _Index);
 	_Try_resize(_Get_new_size_2());
 }
@@ -192,12 +243,12 @@ inline Vector<_Ty>& Vector<_Ty>::operator=(const Vector<_Ty>& _Vec)
 }
 
 template<class _Ty>
-inline Vector<_Ty>& Vector<_Ty>::operator=(Vector<_Ty>&& _Vec)
+inline Vector<_Ty>& Vector<_Ty>::operator=(Vector<_Ty>&& _Vec) noexcept
 {
 	_Clear();
-	_Size = move(_Size);
-	_MaxSize = move(_MaxSize);
-	_Data = move(_Vec._Data);
+	_Size = _Size;
+	_MaxSize = _MaxSize;
+	_Data = _Vec._Data;
 
 	_Vec._Data = NULL;
 	_Vec._Size = 0;
@@ -216,9 +267,33 @@ inline bool Vector<_Ty>::operator==(const Vector<_Ty>& _Vec) const
 }
 
 template<class _Ty>
-inline bool Vector<_Ty>::operator!=(const Vector<_Ty>& _Vec) const
+inline constexpr bool Vector<_Ty>::operator!=(const Vector<_Ty>& _Vec) const
 {
 	return !(*this == _Vec);
+}
+
+template<class _Ty>
+inline bool Vector<_Ty>::operator<(const Vector<_Ty>& _Vec) const
+{
+	return ::lexicographical_compare(begin(), end(), _Vec.begin(), _Vec.end());
+}
+
+template<class _Ty>
+inline constexpr bool Vector<_Ty>::operator<=(const Vector<_Ty>& _Vec) const
+{
+	return !(*this > _Vec);
+}
+
+template<class _Ty>
+inline bool Vector<_Ty>::operator>(const Vector<_Ty>& _Vec) const
+{
+	return ::lexicographical_compare(_Vec.begin(), _Vec.end(), begin(), end());
+}
+
+template<class _Ty>
+inline constexpr bool Vector<_Ty>::operator>=(const Vector<_Ty>& _Vec) const
+{
+	return !(*this < _Vec);
 }
 
 template<class _Ty>
@@ -237,7 +312,7 @@ inline void Vector<_Ty>::_Try_resize(size_t _NewSize)
 template<class _Ty>
 inline size_t Vector<_Ty>::_Get_new_size() const
 {
-	if (_Size == _MaxSize) return _MaxSize << 1;
+	if (_Size >= _MaxSize) return _MaxSize << 1;
 	return _MaxSize;
 }
 
@@ -260,9 +335,10 @@ inline void Vector<_Ty>::_Copy_from(const Vector<_Ty>& _Vec)
 template<class _Ty>
 inline void Vector<_Ty>::_Clear()
 {
+	_Size = 0;
+	_MaxSize = 0;
 	if (!_Data) return;
 	delete[] _Data;
 	_Data = NULL;
-	_MaxSize = 0;
-	_Size = 0;
 }
+
