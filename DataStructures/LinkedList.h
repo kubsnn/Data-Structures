@@ -22,9 +22,10 @@ public:
 	void append(_Ty&& _Val) noexcept;
 	template <class ..._Values>
 	void emplace_back(_Values&&... _Vals) noexcept;
-	void insert(const _Ty& _Val, unsigned int _Index);
-	void insert(_Ty&& _Val, unsigned int _Index);
-
+	void insert(unsigned int _Index, const _Ty& _Val);
+	void insert(unsigned int _Index, _Ty&& _Val) noexcept;
+	template <class ..._Values>
+	void emplace(unsigned int _Index, _Values&&... _Vals) noexcept;
 	bool remove_at(unsigned int _Index);
 	bool pop_begin();
 	bool pop_back();
@@ -62,6 +63,8 @@ private:
 	void _Append_node(ListNode<_Ty>*& _Node);
 	template <class ..._Values>
 	void _Emplace_back(_Values&& ..._Vals) noexcept;
+	template <class ..._Values>
+	void _Emplace(unsigned int _Index, _Values&&... _Vals) noexcept;
 	void _Insert_node(ListNode<_Ty>*& _Node, unsigned int _Index);
 	ListNode<_Ty>*& _Search(unsigned int _Index);
 	ListNode<_Ty>*& _Search_first_half(unsigned int _Index);
@@ -122,8 +125,15 @@ inline void LinkedList<_Ty>::emplace_back(_Values&& ..._Vals) noexcept
 	_Emplace_back(forward<_Values>(_Vals)...);
 }
 
+template<class _Ty>
+template<class ..._Values>
+inline void LinkedList<_Ty>::emplace(unsigned int _Index, _Values && ..._Vals) noexcept
+{
+	_Emplace(_Index, forward<_Values>(_Vals)...);
+}
+
 template <class _Ty>
-inline void LinkedList<_Ty>::insert(const _Ty& _Val, unsigned int _Index)
+inline void LinkedList<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
 	if (_Index == _Size) return append(_Val);
 
@@ -134,7 +144,7 @@ inline void LinkedList<_Ty>::insert(const _Ty& _Val, unsigned int _Index)
 }
 
 template <class _Ty>
-inline void LinkedList<_Ty>::insert(_Ty&& _Val, unsigned int _Index)
+inline void LinkedList<_Ty>::insert(unsigned int _Index, _Ty&& _Val) noexcept
 {
 	if (_Index == _Size) return append(move(_Val));
 
@@ -344,6 +354,29 @@ inline void LinkedList<_Ty>::_Emplace_back(_Values&& ..._Vals) noexcept
 
 		_End = node;
 	}
+	++_Size;
+}
+
+template<class _Ty>
+template<class ..._Values>
+inline void LinkedList<_Ty>::_Emplace(unsigned int _Index, _Values && ..._Vals) noexcept
+{
+	if (_Index == _Size) {
+		_Emplace_back(forward<_Values>(_Vals)...);
+		return;
+	}
+
+	auto* _Tmp = _Search(_Index);
+
+	auto* _Node = new ListNode<_Ty>(forward<_Values>(_Vals)...);
+	auto prev = _Tmp->prev;
+	_Tmp->prev = _Node;
+	_Node->next = _Tmp;
+	_Node->prev = prev;
+
+	if (_Index == 0) _Begin = _Node;
+	else _Node->prev->next = _Node;
+
 	++_Size;
 }
 
