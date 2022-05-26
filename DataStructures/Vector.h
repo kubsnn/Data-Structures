@@ -12,7 +12,7 @@ public:
 	Vector(size_t _Size);
 	Vector(size_t _Size, const _Ty& _Val);
 	Vector(const Vector& _Vec);
-	Vector(Vector&& _Vec);
+	Vector(Vector&& _Vec) noexcept;
 	~Vector();
 
 	void append(const _Ty& _Val);
@@ -94,7 +94,7 @@ inline Vector<_Ty>::Vector(const Vector<_Ty>& _Vec)
 }
 
 template<class _Ty>
-inline Vector<_Ty>::Vector(Vector<_Ty>&& _Vec)
+inline Vector<_Ty>::Vector(Vector<_Ty>&& _Vec) noexcept
 {
 	_Size = _Vec._Size;
 	_MaxSize = _Vec._MaxSize;
@@ -159,6 +159,7 @@ inline void Vector<_Ty>::_Emplace_back(_Values&& ..._Vals)
 	++_Size;
 	_Try_resize(_Get_new_size());
 
+	_Data[_Size - 1].~_Ty();
 	new(&_Data[_Size - 1]) _Ty(forward<_Values>(_Vals)...);
 }
 
