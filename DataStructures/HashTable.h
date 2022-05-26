@@ -14,6 +14,8 @@ template<class _TKey, class _TValue>
 class HashTable
 {
 public:
+	using iterator = HashTableIterator<_TKey, _TValue>;
+
 	HashTable();
 	HashTable(const HashTable<_TKey, _TValue>& _Table);
 	HashTable(HashTable<_TKey, _TValue>&& _Table);
@@ -29,10 +31,10 @@ public:
 
 	size_t bucket_count() const;
 
-	HashTableIterator<_TKey, _TValue> begin();
-	const HashTableIterator<_TKey, _TValue> begin() const;
-	HashTableIterator<_TKey, _TValue> end();
-	const HashTableIterator<_TKey, _TValue> end() const;
+	iterator begin();
+	const iterator begin() const;
+	iterator end();
+	const iterator end() const;
 
 	_TValue& operator[](const _TKey& _Key);
 	const _TValue& operator[](const _TKey& _Key) const;
@@ -161,25 +163,25 @@ inline size_t HashTable<_TKey, _TValue>::bucket_count() const
 template<class _TKey, class _TValue>
 inline HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin()
 {
-	return HashTableIterator<_TKey, _TValue>(_Buckets, _BucketCount); 
+	return iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
 inline const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin() const
 {
-	return HashTableIterator<_TKey, _TValue>(_Buckets, _BucketCount);
+	return iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
 inline HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end()
 {
-	return HashTableIterator<_TKey, _TValue>(_Buckets + _BucketCount, 0);
+	return iterator(_Buckets + _BucketCount, 0);
 }
 
 template<class _TKey, class _TValue>
 inline const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end() const
 {
-	return HashTableIterator<_TKey, _TValue>(_Buckets + _BucketCount, 0);
+	return iterator(_Buckets + _BucketCount, 0);
 }
 
 template<class _TKey, class _TValue>

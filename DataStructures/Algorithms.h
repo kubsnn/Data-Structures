@@ -141,21 +141,27 @@ inline constexpr _Container<_Ty> range(size_t _Count)
     return range<_Ty, _Container>(_Count, 1);
 }
 
+template <class _Array>
+inline constexpr _Array range(int _Step)
+{
+    _Array _Data;
+    size_t next = _Step > 0 ? 0 : (int)(1 - _Data.size()) * _Step;
+    for (size_t i = 0; i < _Data.size(); ++i, next += _Step) {
+        _Data[i] = next;
+    }
+    return _Data;
+}
 
 template <class _Array>
 inline constexpr _Array range()
 {
-    _Array _Data;
-    for (size_t i = 0; i < _Data.size(); ++i) {
-        _Data[i] = i;
-    }
-    return _Data;
+    return range<_Array>(1);
 }
 
 template <class _Iter>
 inline constexpr void reverse(_Iter _First, _Iter _Last)
 {
     while (_First < --_Last) {
-        swap(*_First++, *_Last);
+        iter_swap(_First++, _Last);
     }
 }
