@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-template<typename T>
+template<typename _Ty>
 struct Hash
 {
-	virtual size_t operator()(const T& item) = delete;
+	virtual size_t operator()(const _Ty& item) = delete;
 };
 
 template<>

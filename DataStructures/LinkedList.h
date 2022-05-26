@@ -12,6 +12,7 @@ class LinkedList
 {
 public:
 	using iterator = LinkedListIterator<_Ty>;
+	using type = _Ty;
 
 	LinkedList();
 	LinkedList(const LinkedList& _List);
@@ -489,7 +490,7 @@ private:
 		value = other.value;
 	}
 };
-
+\
 //
 //	ITERATOR
 //

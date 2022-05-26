@@ -90,6 +90,12 @@ inline void swap(_Ty& _Left, _Ty& _Right)
 	_Left = move(_Tmp);
 }
 
+template <class _Iter>
+inline constexpr void iter_swap(_Iter _Left, _Iter _Right)
+{
+	swap(*_Left, *_Right);
+}
+
 template <class _FwdIt, class _Ty>
 inline constexpr void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val)
 {
