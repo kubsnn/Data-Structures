@@ -161,3 +161,17 @@ inline bool lexicographical_compare(const InputIt1 _First1, const InputIt1 _Last
 	}
 	return (_UFirst1 == _Last1) && (_UFirst2 != _Last2);
 }
+
+template <class InputIt1, class InputIt2>
+inline constexpr bool arrays_compare(const InputIt1 _First1, const InputIt1 _Last1,
+	const InputIt2 _First2, const InputIt2 _Last2)
+{
+	if (_Last1 - _First1 != _Last2 - _First2) return false;
+
+	auto _UFirst1 = const_cast<InputIt1>(_First1);
+	auto _UFirst2 = const_cast<InputIt2>(_First2);
+	for (; _UFirst1 != _Last1; ++_UFirst1, ++_UFirst2) {
+		if (*_UFirst1 != *_UFirst2) return false;
+	}
+	return true;
+}

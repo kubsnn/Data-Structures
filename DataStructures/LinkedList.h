@@ -29,12 +29,13 @@ public:
 	bool remove_at(unsigned int _Index);
 	bool pop_begin();
 	bool pop_back();
+	iterator find(const _Ty& _Val);
 
 
-	iterator begin();
-	const iterator begin() const;
-	iterator end();
-	const iterator end() const;
+	constexpr iterator begin();
+	constexpr const iterator begin() const;
+	constexpr iterator end();
+	constexpr const iterator end() const;
 
 	size_t size() const;
 
@@ -209,26 +210,35 @@ inline bool LinkedList<_Ty>::pop_back()
 	return true;
 }
 
+template<class _Ty>
+inline LinkedListIterator<_Ty> LinkedList<_Ty>::find(const _Ty& _Val)
+{
+	for (iterator it = begin(); it != end(); ++it) {
+		if (*it == _Val) return it;
+	}
+	return end();
+}
+
 template <class _Ty>
-inline LinkedListIterator<_Ty> LinkedList<_Ty>::begin()
+inline constexpr LinkedListIterator<_Ty> LinkedList<_Ty>::begin()
 {
 	return LinkedListIterator<_Ty>(_Begin);
 }
 
 template <class _Ty>
-inline const LinkedListIterator<_Ty> LinkedList<_Ty>::begin() const
+inline constexpr const LinkedListIterator<_Ty> LinkedList<_Ty>::begin() const
 {
 	return LinkedListIterator<_Ty>(_Begin);
 }
 
 template <class _Ty>
-inline LinkedListIterator<_Ty> LinkedList<_Ty>::end()
+inline constexpr LinkedListIterator<_Ty> LinkedList<_Ty>::end()
 {
 	return LinkedListIterator<_Ty>(_End->next);
 }
 
 template <class _Ty>
-inline const LinkedListIterator<_Ty> LinkedList<_Ty>::end() const
+inline constexpr const LinkedListIterator<_Ty> LinkedList<_Ty>::end() const
 {
 	return LinkedListIterator<_Ty>(_End->next);
 }
