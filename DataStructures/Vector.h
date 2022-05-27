@@ -22,6 +22,8 @@ public:
 	void emplace_back(_Values&&... args);
 	void append(const Vector& _Vec);
 	void append(Vector&& _Vec);
+	template <class _FwdIt>
+	void append(const _FwdIt _First, const _FwdIt _Last);
 
 	void insert(unsigned int _Index, const _Ty& _Val);
 	void insert(unsigned int _Index, _Ty&& _Val);
@@ -150,6 +152,15 @@ template<class ..._Values>
 inline void Vector<_Ty>::emplace_back(_Values&&... _Vals)
 {
 	_Emplace_back(forward<_Values>(_Vals)...);
+}
+
+template<class _Ty>
+template<class _FwdIt>
+inline void Vector<_Ty>::append(_FwdIt _First, const _FwdIt _Last)
+{
+	for (; _First != _Last; ++_First) {
+		_Emplace_back(*_First);
+	}
 }
 
 template<class _Ty>

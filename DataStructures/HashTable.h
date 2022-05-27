@@ -402,9 +402,9 @@ inline HashTableIterator<_TKey, _TValue>& HashTableIterator<_TKey, _TValue>::ope
 template<class _TKey, class _TValue>
 inline HashTableIterator<_TKey, _TValue> HashTableIterator<_TKey, _TValue>::operator++(int)
 {
-	auto p = _List;
+	auto p = *this;
 	find_next_value();
-	return *p;
+	return p;
 }
 
 template<class _TKey, class _TValue>

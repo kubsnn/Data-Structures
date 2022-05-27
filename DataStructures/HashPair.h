@@ -7,7 +7,7 @@ struct HashPair
 	_TValue value;
 	HashPair();
 	HashPair(const HashPair<_TKey, _TValue>& _Pair);
-	HashPair(HashPair<_TKey, _TValue>&& _Pair);
+	HashPair(HashPair<_TKey, _TValue>&& _Pair) noexcept;
 	HashPair(const _TKey& _Key, const _TValue& _Value);
 	HashPair(const _TKey& _Key, _TValue&& _Value);
 	HashPair(_TKey&& _Key, const _TValue& _Value);
@@ -20,51 +20,45 @@ struct HashPair
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair()
-	: key(_TKey{}), value(_TValue{})
-{
-}
+	: key(_TKey{})
+	, value(_TValue{})
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair(const HashPair<_TKey, _TValue>& _Pair)
-{
-	key = _Pair.key;
-	value = _Pair.value;
-}
+	: key(_Pair.key)
+	, value(_Pair.value)
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair(const _TKey& _Key, const _TValue& _Value)
-{
-	key = _Key;
-	value = _Value;
-}
+	: key(_Key)
+	, value(_Value)
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair(const _TKey& _Key, _TValue&& _Value)
-{
-	key = _Key;
-	value = move(_Value);
-}
+	: key(_Key)
+	, value(move(_Value))
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair(_TKey&& _Key, const _TValue& _Value)
-{
-	key = move(_Key);
-	value = _Value;
-}
+	: key(move(_Key))
+	, value(_Value)
+{ }
 
 template<class _TKey, class _TValue>
-inline HashPair<_TKey, _TValue>::HashPair(HashPair<_TKey, _TValue>&& _Pair)
-{
-	key = move(_Pair.key);
-	value = move(_Pair.value);
-}
+inline HashPair<_TKey, _TValue>::HashPair(HashPair<_TKey, _TValue>&& _Pair) noexcept
+	: key(move(_Pair.key))
+	, value(move(_Pair.value))
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>::HashPair(_TKey&& _Key, _TValue&& _Value)
-{
-	key = move(_Key);
-	value = move(_Value);
-}
+	: key(move(_Key))
+	, value(move(_Value))
+{ }
 
 template<class _TKey, class _TValue>
 inline HashPair<_TKey, _TValue>& HashPair<_TKey, _TValue>::operator=(const HashPair<_TKey, _TValue>& _Right)

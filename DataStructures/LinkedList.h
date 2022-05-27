@@ -20,6 +20,8 @@ public:
 	~LinkedList();
 	void append(const _Ty& _Val);
 	void append(_Ty&& _Val) noexcept;
+	template <class _FwdIt>
+	void append(_FwdIt _First, const _FwdIt _Last);
 	template <class ..._Values>
 	void emplace_back(_Values&&... _Vals) noexcept;
 	void insert(unsigned int _Index, const _Ty& _Val);
@@ -117,6 +119,24 @@ template <class _Ty>
 inline void LinkedList<_Ty>::append(_Ty&& _Val) noexcept
 {
 	_Emplace_back(forward<_Ty>(_Val));
+}
+
+template<class _Ty>
+template<class _FwdIt>
+inline void LinkedList<_Ty>::append(_FwdIt _First, const _FwdIt _Last)
+{
+	if (_First == _Last) return;
+
+	_Emplace_back(*_First++);
+
+	for (; _First != _Last; ++_First) {
+		auto* node = new ListNode<_Ty>(*_First);
+		_End->next = node;
+		node->prev = _End;
+
+		_End = node;
+		++_Size;
+	}
 }
 
 template <class _Ty>
