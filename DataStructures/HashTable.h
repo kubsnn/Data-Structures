@@ -17,8 +17,8 @@ public:
 	using iterator = HashTableIterator<_TKey, _TValue>;
 
 	HashTable();
-	HashTable(const HashTable<_TKey, _TValue>& _Table);
-	HashTable(HashTable<_TKey, _TValue>&& _Table);
+	HashTable(const HashTable& _Table);
+	HashTable(HashTable&& _Table);
 	~HashTable();
 
 	void insert(const _TKey& _Key, const _TValue& _Val);
@@ -31,18 +31,19 @@ public:
 
 	size_t bucket_count() const;
 
-	iterator begin();
-	const iterator begin() const;
-	iterator end();
-	const iterator end() const;
+	constexpr iterator begin();
+	constexpr const iterator begin() const;
+	constexpr iterator end();
+	constexpr const iterator end() const;
 
 	_TValue& operator[](const _TKey& _Key);
 	const _TValue& operator[](const _TKey& _Key) const;
 
-	HashTable<_TKey, _TValue>& operator=(const HashTable<_TKey, _TValue>& _Table);
-	HashTable<_TKey, _TValue>& operator=(HashTable<_TKey, _TValue>&& _Table) noexcept;
+	HashTable& operator=(const HashTable& _Table);
+	HashTable& operator=(HashTable&& _Table) noexcept;
 
-private:
+	bool operator==(const HashTable& _Table);
+protected:
 	size_t _Count = 0;
 	size_t _BucketCount = 8;
 	size_t _Mask;
@@ -72,7 +73,7 @@ inline HashTable<_TKey, _TValue>::HashTable()
 template<class _TKey, class _TValue>
 inline HashTable<_TKey, _TValue>::HashTable(const HashTable<_TKey, _TValue>& _Table)
 {
-	_Buckets = new LinkedList<HashPair<_TKey, _TValue>>*[_BucketCount];
+	_Buckets = new LinkedList<HashPair<_TKey, _TValue>>*[_Table._BucketCount];
 	_Copy_from(_Table);
 }
 
@@ -161,25 +162,25 @@ inline size_t HashTable<_TKey, _TValue>::bucket_count() const
 }
 
 template<class _TKey, class _TValue>
-inline HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin()
+inline constexpr HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin()
 {
 	return iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
-inline const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin() const
+inline constexpr const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::begin() const
 {
 	return iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
-inline HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end()
+inline constexpr HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end()
 {
 	return iterator(_Buckets + _BucketCount, 0);
 }
 
 template<class _TKey, class _TValue>
-inline const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end() const
+inline constexpr const HashTableIterator<_TKey, _TValue> HashTable<_TKey, _TValue>::end() const
 {
 	return iterator(_Buckets + _BucketCount, 0);
 }
@@ -218,13 +219,45 @@ inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable
 }
 
 template<class _TKey, class _TValue>
+inline bool HashTable<_TKey, _TValue>::operator==(const HashTable& _Table)
+{
+	if (_Count != _Table._Count) return false;
+
+	auto _KeysIdx1 = new _TKey[_Count];
+	auto _KeysIdx2 = new _TKey[_Count];
+
+	for (size_t i = 0, j = 0; j < _Count; ++i) {
+		if (_Buckets[i]) for (const auto& e : *_Buckets[i]) {
+			_KeysIdx1[j++] = e.key;
+		}
+	}
+	for (size_t i = 0, j = 0; j < _Table._Count; ++i) {
+		if (_Table._Buckets[i]) for (const auto& e : *_Table._Buckets[i]) {
+			_KeysIdx2[j++] = e.key;
+		}
+	}
+	if (_BucketCount != _Table._BucketCount) {
+		sort(_KeysIdx1, _KeysIdx1 + _Count);
+		sort(_KeysIdx2, _KeysIdx2 + _Count);
+	}
+
+	bool result = arrays_compare(_KeysIdx1, _KeysIdx1 + _Count, _KeysIdx2, _KeysIdx2 + _Count);
+
+	delete[] _KeysIdx1;
+	delete[] _KeysIdx2;
+
+	return result;
+}
+
+template<class _TKey, class _TValue>
 inline void HashTable<_TKey, _TValue>::_Insert(HashPair<_TKey, _TValue>& _Pair)
 {
 	_Try_resize();
 	size_t index = _Bucket_index(_Pair.key);
 
 	if (!_Buckets[index]) _Buckets[index] = new LinkedList<HashPair<_TKey, _TValue>>();
-		
+	else if (_Buckets[index]->find(_Pair) != _Buckets[index]->end()) return;
+
 	_Buckets[index]->append(move(_Pair));
 }
 
@@ -324,8 +357,8 @@ inline void HashTable<_TKey, _TValue>::_Clear()
 template<class _TKey, class _TValue>
 struct HashTableIterator
 {
-	friend class HashTable<_TKey, _TValue>;
 public:
+	friend class HashTable<_TKey, _TValue>;
 	HashTableIterator(LinkedList<HashPair<_TKey, _TValue>>** _List, size_t _Size);
 
 	HashPair<_TKey, _TValue>& operator*();
@@ -339,7 +372,7 @@ private:
 	int _BucketsLeft;
 	int _CurrentBucketIndex = 0;
 
-	void find_next_value();
+	constexpr void find_next_value();
 };
 
 template<class _TKey, class _TValue>
@@ -387,7 +420,7 @@ inline bool HashTableIterator<_TKey, _TValue>::operator!=(const HashTableIterato
 }
 
 template<class _TKey, class _TValue>
-void HashTableIterator<_TKey, _TValue>::find_next_value()
+constexpr void HashTableIterator<_TKey, _TValue>::find_next_value()
 {
 	while (*_List == NULL) {
 		if (_BucketsLeft == 0) return;

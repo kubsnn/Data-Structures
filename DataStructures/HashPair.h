@@ -14,6 +14,8 @@ struct HashPair
 	HashPair(_TKey&& _Key, _TValue&& _Value);
 	HashPair<_TKey, _TValue>& operator=(const HashPair<_TKey, _TValue>& _Right);
 	HashPair<_TKey, _TValue>& operator=(HashPair<_TKey, _TValue>&& _Right) noexcept;
+	bool operator==(const HashPair& _Right);
+	bool operator!=(const HashPair& _Right);
 };
 
 template<class _TKey, class _TValue>
@@ -78,4 +80,16 @@ inline HashPair<_TKey, _TValue>& HashPair<_TKey, _TValue>::operator=(HashPair<_T
 	key = move(_Right.key);
 	value = move(_Right.value);
 	return *this;
+}
+
+template<class _TKey, class _TValue>
+inline bool HashPair<_TKey, _TValue>::operator==(const HashPair& _Right)
+{
+	return key == _Right.key;
+}
+
+template<class _TKey, class _TValue>
+inline bool HashPair<_TKey, _TValue>::operator!=(const HashPair& _Right)
+{
+	return key != _Right.key;
 }
