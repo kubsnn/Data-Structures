@@ -8,13 +8,13 @@
 struct SetEmptyEl{};
 
 template <class _TValue>
-struct SetIterator;
+struct ConstSetIterator;
 
 template <class _TValue>
 class Set : protected HashTable<_TValue, SetEmptyEl>
 {
 public:
-	using const_iterator = SetIterator<_TValue>;
+	using const_iterator = ConstSetIterator<_TValue>;
 
 	Set();
 	Set(const Set& _Set);
@@ -22,9 +22,11 @@ public:
 
 	void insert(const _TValue& _Val);
 	void insert(_TValue&& _Val) noexcept;
-	template<class _FwdIt>
+	template <class _FwdIt>
 	void insert(_FwdIt _First, const _FwdIt _Last);
-	
+	template <class ..._Values>
+	void emplace(_Values&&... _Vals);
+
 	bool remove(const _TValue& _Val);
 
 	const_iterator find(const _TValue& _Key) const;
@@ -35,7 +37,7 @@ public:
 	Set& operator=(const Set& _Table);
 	Set& operator=(Set&& _Table) noexcept;
 
-	bool operator==(const Set& _Set);
+	bool operator==(const Set& _Set) const;
 
 };
 
@@ -87,6 +89,13 @@ inline void Set<_TValue>::insert(_FwdIt _First, const _FwdIt _Last)
 	}
 }
 
+template<class _TValue>
+template<class ..._Values>
+inline void Set<_TValue>::emplace(_Values&&... _Vals)
+{
+	HashTable<_TValue, SetEmptyEl>::insert(_TValue(forward<_Values>(_Vals)...), SetEmptyEl{});
+}
+
 
 template<class _TValue>
 inline bool Set<_TValue>::remove(const _TValue& _Val)
@@ -101,15 +110,11 @@ inline Set<_TValue>::const_iterator Set<_TValue>::find(const _TValue& _Key) cons
 
 	if (this->_Buckets[index] == NULL) return this->end();
 
-	size_t counter = 0;
-	for (auto& e : *this->_Buckets[index]) {
-		if (e.key == _Key) {
-			const_iterator it(&this->_Buckets[index], counter);
-			while (counter > 0) ++it;
-			return it;
-		}
-		++counter;
+	const auto _End = end();
+	for (const_iterator it = begin(); it != _End; ++it) {
+		if (*it == _Key) return it;
 	}
+
 	return this->end();
 }
 
@@ -137,7 +142,7 @@ inline Set<_TValue>& Set<_TValue>::operator=(Set&& _Set) noexcept
 }
 
 template<class _TValue>
-inline bool Set<_TValue>::operator==(const Set& _Set)
+inline bool Set<_TValue>::operator==(const Set& _Set) const
 {
 	return HashTable<_TValue, SetEmptyEl>::operator==(_Set);
 }
@@ -147,31 +152,31 @@ inline bool Set<_TValue>::operator==(const Set& _Set)
 /// 
 
 template <class _TValue>
-struct SetIterator : public HashTableIterator<_TValue, SetEmptyEl>
+struct ConstSetIterator : public HashTableIterator<_TValue, SetEmptyEl>
 {
 public:
 	using HashTableIterator<_TValue, SetEmptyEl>::HashTableIterator;
 	friend class Set<_TValue>;
 	const _TValue& operator*();
-	SetIterator<_TValue>& operator++();
-	SetIterator<_TValue> operator++(int);
+	ConstSetIterator<_TValue>& operator++();
+	ConstSetIterator<_TValue> operator++(int);
 };
 
 template<class _TValue>
-inline const _TValue& SetIterator<_TValue>::operator*()
+inline const _TValue& ConstSetIterator<_TValue>::operator*()
 {
 	return HashTableIterator<_TValue, SetEmptyEl>::operator*().key;
 }
 
 template<class _TValue>
-inline SetIterator<_TValue>& SetIterator<_TValue>::operator++()
+inline ConstSetIterator<_TValue>& ConstSetIterator<_TValue>::operator++()
 {
 	HashTableIterator<_TValue, SetEmptyEl>::operator++();
 	return *this;
 }
 
 template<class _TValue>
-inline SetIterator<_TValue> SetIterator<_TValue>::operator++(int)
+inline ConstSetIterator<_TValue> ConstSetIterator<_TValue>::operator++(int)
 {
 	auto p = *this;
 	HashTableIterator<_TValue, SetEmptyEl>::operator++();

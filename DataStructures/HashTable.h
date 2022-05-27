@@ -42,7 +42,7 @@ public:
 	HashTable& operator=(const HashTable& _Table);
 	HashTable& operator=(HashTable&& _Table) noexcept;
 
-	bool operator==(const HashTable& _Table);
+	bool operator==(const HashTable& _Table) const;
 protected:
 	size_t _Count = 0;
 	size_t _BucketCount = 8;
@@ -219,7 +219,7 @@ inline HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable
 }
 
 template<class _TKey, class _TValue>
-inline bool HashTable<_TKey, _TValue>::operator==(const HashTable& _Table)
+inline bool HashTable<_TKey, _TValue>::operator==(const HashTable& _Table) const
 {
 	if (_Count != _Table._Count) return false;
 
@@ -450,9 +450,9 @@ struct Hash<HashTable<_TKey, _TValue>>
 		size_t hash = 0;
 		size_t power = 1;
 		const int mod = 1e9 + 7;
-		for (const auto& e : _Table) {
-			hash = (hash + Hash<_TKey>()(e.key) * power) % mod;
-			hash = (hash + Hash<_TValue>()(e.value) * power) % mod;
+		for (const auto& [key, value] : _Table) {
+			hash = (hash + Hash<_TKey>()(key) * power) % mod;
+			hash = (hash + Hash<_TValue>()(value) * power) % mod;
 
 			power = (power * 31) % mod;
 		}
