@@ -32,7 +32,7 @@
     <ClInclude Include="HashTable.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="HashPair.h">
+    <ClInclude Include="CompressedPair.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="Vector.h">

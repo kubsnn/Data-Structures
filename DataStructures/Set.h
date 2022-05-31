@@ -2,8 +2,11 @@
 
 #include "Utility.h"
 #include "Hash.h"
-#include "HashPair.h"
+#include "CompressedPair.h"
 #include "HashTable.h"
+
+
+#pragma pack (push, 1)
 
 struct SetEmptyEl{};
 
@@ -14,7 +17,9 @@ template <class _TValue>
 class Set : protected HashTable<_TValue, SetEmptyEl>
 {
 public:
-	using const_iterator = ConstSetIterator<_TValue>;
+	using base = HashTable<_TValue, SetEmptyEl>;
+	using const_iterator = ConstSetIterator<const _TValue>;
+	
 
 	Set();
 	Set(const Set& _Set);
@@ -39,21 +44,22 @@ public:
 
 	bool operator==(const Set& _Set) const;
 
+	void clear();
 };
 
 template<class _TValue>
 inline Set<_TValue>::Set()
-	: HashTable<_TValue, SetEmptyEl>()
+	: base()
 { }
 
 template<class _TValue>
 inline Set<_TValue>::Set(const Set& _Set)
-	: HashTable<_TValue, SetEmptyEl>(_Set)
+	: base(_Set)
 { }
 
 template<class _TValue>
 inline Set<_TValue>::Set(Set&& _Set) noexcept
-	: HashTable<_TValue, SetEmptyEl>(move(_Set))
+	: base(move(_Set))
 { }
 
 template<class _TValue>
@@ -71,13 +77,13 @@ inline constexpr Set<_TValue>::const_iterator Set<_TValue>::end() const
 template<class _TValue>
 inline void Set<_TValue>::insert(const _TValue & _Val)
 {
-	HashTable<_TValue, SetEmptyEl>::insert(_Val, SetEmptyEl{});
+	base::insert(_Val, SetEmptyEl{});
 }
 
 template<class _TValue>
 inline void Set<_TValue>::insert(_TValue&& _Val) noexcept
 {
-	HashTable<_TValue, SetEmptyEl>::insert(move(_Val), SetEmptyEl{});
+	base::insert(move(_Val), SetEmptyEl{});
 }
 
 template<class _TValue>
@@ -85,7 +91,7 @@ template<class _FwdIt>
 inline void Set<_TValue>::insert(_FwdIt _First, const _FwdIt _Last)
 {
 	for (; _First != _Last; ++_First) {
-		HashTable<_TValue, SetEmptyEl>::insert(*_First, SetEmptyEl{});
+		base::insert(*_First, SetEmptyEl{});
 	}
 }
 
@@ -93,14 +99,14 @@ template<class _TValue>
 template<class ..._Values>
 inline void Set<_TValue>::emplace(_Values&&... _Vals)
 {
-	HashTable<_TValue, SetEmptyEl>::insert(_TValue(forward<_Values>(_Vals)...), SetEmptyEl{});
+	base::insert(_TValue(forward<_Values>(_Vals)...), SetEmptyEl{});
 }
 
 
 template<class _TValue>
 inline bool Set<_TValue>::remove(const _TValue& _Val)
 {
-	return HashTable<_TValue, SetEmptyEl>::remove(_Val);
+	return base::remove(_Val);
 }
 
 template<class _TValue>
@@ -121,9 +127,9 @@ inline Set<_TValue>::const_iterator Set<_TValue>::find(const _TValue& _Key) cons
 template<class _TValue>
 inline Set<_TValue>& Set<_TValue>::operator=(const Set& _Set)
 {
-	this->_Clear();
-	this->_Buckets = new LinkedList<HashPair<_TValue, SetEmptyEl>>*[_Set._BucketCount];
-	this->_Copy_from(_Set);
+	base::_Clear();
+	base::_Buckets = new LinkedList<compressed_pair<_TValue, SetEmptyEl>>*[_Set._BucketCount];
+	base::_Copy_from(_Set);
 	return *this;
 }
 
@@ -144,7 +150,13 @@ inline Set<_TValue>& Set<_TValue>::operator=(Set&& _Set) noexcept
 template<class _TValue>
 inline bool Set<_TValue>::operator==(const Set& _Set) const
 {
-	return HashTable<_TValue, SetEmptyEl>::operator==(_Set);
+	return base::operator==(_Set);
+}
+
+template<class _TValue>
+inline void Set<_TValue>::clear()
+{
+	base::clear();
 }
 
 ///
@@ -155,7 +167,8 @@ template <class _TValue>
 struct ConstSetIterator : public HashTableIterator<_TValue, SetEmptyEl>
 {
 public:
-	using HashTableIterator<_TValue, SetEmptyEl>::HashTableIterator;
+	using base = HashTableIterator<_TValue, SetEmptyEl>;
+	using base::base;
 	friend class Set<_TValue>;
 	const _TValue& operator*();
 	ConstSetIterator<_TValue>& operator++();
@@ -165,13 +178,13 @@ public:
 template<class _TValue>
 inline const _TValue& ConstSetIterator<_TValue>::operator*()
 {
-	return HashTableIterator<_TValue, SetEmptyEl>::operator*().key;
+	return base::operator*().first();
 }
 
 template<class _TValue>
 inline ConstSetIterator<_TValue>& ConstSetIterator<_TValue>::operator++()
 {
-	HashTableIterator<_TValue, SetEmptyEl>::operator++();
+	base::operator++();
 	return *this;
 }
 
@@ -179,7 +192,7 @@ template<class _TValue>
 inline ConstSetIterator<_TValue> ConstSetIterator<_TValue>::operator++(int)
 {
 	auto p = *this;
-	HashTableIterator<_TValue, SetEmptyEl>::operator++();
+	base::operator++();
 	return p;
 }
 
@@ -190,7 +203,7 @@ struct Hash<Set<_TValue>>
 	{
 		size_t hash = 0;
 		size_t power = 1;
-		const int mod = 1e9 + 7;
+		const int mod = static_cast<int>(1e9) + 7;
 		for (const auto& e : _Table) {
 			hash = (hash + Hash<_TValue>()(e) * power) % mod;
 
@@ -201,3 +214,4 @@ struct Hash<Set<_TValue>>
 	}
 };
 
+#pragma pack (pop)

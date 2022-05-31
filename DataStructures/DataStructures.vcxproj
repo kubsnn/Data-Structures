@@ -147,7 +147,7 @@
     <ClInclude Include="Algorithms.h" />
     <ClInclude Include="Array.h" />
     <ClInclude Include="Hash.h" />
-    <ClInclude Include="HashPair.h" />
+    <ClInclude Include="CompressedPair.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Set.h" />
