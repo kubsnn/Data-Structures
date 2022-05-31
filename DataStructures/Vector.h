@@ -7,7 +7,8 @@ class Vector
 {
 public:
 	using iterator = _Ty*;
-
+	using const_iterator = const _Ty*;
+	
 	Vector();
 	Vector(size_t _Size);
 	Vector(size_t _Size, const _Ty& _Val);
@@ -27,6 +28,8 @@ public:
 
 	void insert(unsigned int _Index, const _Ty& _Val);
 	void insert(unsigned int _Index, _Ty&& _Val);
+	template <class ..._Values>
+	void emplace(unsigned int _Index, _Values&&... _Vals);
 
 
 	void remove_at(unsigned int _Index);
@@ -34,9 +37,9 @@ public:
 	constexpr size_t size() const;
 
 	constexpr iterator begin();
-	constexpr const iterator begin() const;
+	constexpr const_iterator begin() const;
 	constexpr iterator end();
-	constexpr const iterator end() const;
+	constexpr const_iterator end() const;
 
 	void clear();
 
@@ -60,6 +63,8 @@ private:
 
 	template <class ..._Values>
 	void _Emplace_back(_Values&& ..._Vals);
+	template <class ..._Values>
+	void _Emplace(size_t _Where, _Values&& ..._Vals);
 	void _Try_resize(size_t _NewSize);
 	size_t _Get_new_size() const;
 	size_t _Get_new_size_2() const;
@@ -116,13 +121,13 @@ inline Vector<_Ty>::~Vector()
 template<class _Ty>
 inline void Vector<_Ty>::append(const _Ty& _Val)
 {
-	_Emplace_back(forward<const _Ty>(_Val));
+	_Emplace_back(_Val);
 }
 
 template<class _Ty>
 inline void Vector<_Ty>::append(_Ty&& _Val)
 {
-	_Emplace_back(forward<_Ty>(_Val));
+	_Emplace_back(move<_Ty>(_Val));
 }
 
 template<class _Ty>
@@ -165,31 +170,21 @@ inline void Vector<_Ty>::append(_FwdIt _First, const _FwdIt _Last)
 
 template<class _Ty>
 template<class ..._Values>
-inline void Vector<_Ty>::_Emplace_back(_Values&& ..._Vals)
+inline void Vector<_Ty>::emplace(unsigned int _Index, _Values && ..._Vals)
 {
-	++_Size;
-	_Try_resize(_Get_new_size());
-
-	_Data[_Size - 1].~_Ty();
-	new(&_Data[_Size - 1]) _Ty(forward<_Values>(_Vals)...);
+	_Emplace(_Index, forward<_Values>(_Vals)...);
 }
 
 template<class _Ty>
 inline void Vector<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
-	++_Size;
-	_Try_resize(_Get_new_size());
-	move_mem(_Data + _Index, _Data + _Index + 1, _Size - _Index);
-	_Data[_Index] = _Val;
+	_Emplace(_Index, _Val);
 }
 
 template<class _Ty>
 inline void Vector<_Ty>::insert(unsigned int _Index, _Ty&& _Val)
 {
-	++_Size;
-	_Try_resize(_Get_new_size());
-	move_mem(_Data + _Index, _Data + _Index + 1, _Size - _Index);
-	_Data[_Index] = move(_Val);
+	_Emplace(_Index, move(_Val));
 }
 
 template<class _Ty>
@@ -214,7 +209,7 @@ inline constexpr _Ty* Vector<_Ty>::begin()
 }
 
 template<class _Ty>
-inline constexpr const Vector<_Ty>::iterator Vector<_Ty>::begin() const
+inline constexpr Vector<_Ty>::const_iterator Vector<_Ty>::begin() const
 {
 	return _Data;
 }
@@ -226,7 +221,7 @@ inline constexpr _Ty* Vector<_Ty>::end()
 }
 
 template<class _Ty>
-inline constexpr const Vector<_Ty>::iterator Vector<_Ty>::end() const
+inline constexpr Vector<_Ty>::const_iterator Vector<_Ty>::end() const
 {
 	return _Data + _Size;
 }
@@ -311,6 +306,28 @@ template<class _Ty>
 inline constexpr bool Vector<_Ty>::operator>=(const Vector<_Ty>& _Vec) const
 {
 	return !(*this < _Vec);
+}
+
+template<class _Ty>
+template<class ..._Values>
+inline void Vector<_Ty>::_Emplace_back(_Values&& ..._Vals)
+{
+	++_Size;
+	_Try_resize(_Get_new_size());
+
+	_Data[_Size - 1].~_Ty();
+	new(&_Data[_Size - 1]) _Ty(forward<_Values>(_Vals)...);
+}
+
+template<class _Ty>
+template<class ..._Values>
+inline void Vector<_Ty>::_Emplace(size_t _Where, _Values && ..._Vals)
+{
+	++_Size;
+	_Try_resize(_Get_new_size());
+	move_mem(_Data + _Where, _Data + _Where + 1, _Size - _Where);
+	_Data[_Where].~_Ty();
+	new(&_Data[_Where]) _Ty(forward<_Values>(_Vals)...);
 }
 
 template<class _Ty>
