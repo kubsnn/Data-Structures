@@ -13,7 +13,7 @@ struct Hash<int>
 	static constexpr const size_t _Mask = -1;
 	static constexpr const size_t _Magic = _Mask ^ 2763427254;
 
-	size_t operator()(const int& i) const
+	constexpr size_t operator()(const int& i) const
 	{
 		return i * _Magic;
 	}
@@ -22,7 +22,7 @@ struct Hash<int>
 template<>
 struct Hash<char>
 {
-	inline size_t operator()(const char& c) const
+	constexpr size_t operator()(const char& c) const
 	{
 		return Hash<int>()(c);
 	}
@@ -31,7 +31,7 @@ struct Hash<char>
 template<>
 struct Hash<long long>
 {
-	size_t operator()(const long long& ll) const
+	constexpr size_t operator()(const long long& ll) const
 	{
 		unsigned long long x = ll;
 		x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull;
@@ -44,7 +44,7 @@ struct Hash<long long>
 template<>
 struct Hash<double>
 {
-	inline size_t operator()(const double& d) const
+	constexpr  size_t operator()(const double& d) const
 	{
 		return Hash<long long>()(*(size_t*)&d);
 	}
@@ -53,12 +53,12 @@ struct Hash<double>
 template<>
 struct Hash<std::string>
 {
-	size_t operator()(const std::string& s) const
+	constexpr size_t operator()(const std::string& s) const
 	{
 		size_t sum = 1;
 		size_t n = s.length();
 		size_t power = 1;
-		const size_t MOD = 1e9 + 7;
+		const size_t MOD = static_cast<size_t>(1e9) + 7;
 
 		for (int i = 0; i < n; ++i) {
 			sum = (sum + (size_t)(s[i]) * power) % MOD;

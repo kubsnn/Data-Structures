@@ -1,6 +1,8 @@
 #pragma once
 #include "Utility.h"
 
+#pragma pack (push, 1)
+
 template  <class _Ty>
 struct ListNode;
 
@@ -12,7 +14,6 @@ class LinkedList
 {
 public:
 	using iterator = LinkedListIterator<_Ty>;
-	using type = _Ty;
 
 	LinkedList();
 	LinkedList(const LinkedList& _List);
@@ -112,13 +113,13 @@ inline LinkedList<_Ty>::~LinkedList()
 template <class _Ty>
 inline void LinkedList<_Ty>::append(const _Ty& _Val)
 {
-	_Emplace_back(forward<const _Ty>(_Val));
+	_Emplace_back(_Val);
 }
 
 template <class _Ty>
 inline void LinkedList<_Ty>::append(_Ty&& _Val) noexcept
 {
-	_Emplace_back(forward<_Ty>(_Val));
+	_Emplace_back(move<_Ty>(_Val));
 }
 
 template<class _Ty>
@@ -158,8 +159,7 @@ inline void LinkedList<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
 	if (_Index == _Size) return append(_Val);
 
-	auto next = new ListNode<_Ty>();
-	next->value = const_cast<_Ty&>(_Val);
+	auto next = new ListNode<_Ty>(_Val);
 
 	_Insert_node(next, _Index);
 }
@@ -169,8 +169,7 @@ inline void LinkedList<_Ty>::insert(unsigned int _Index, _Ty&& _Val) noexcept
 {
 	if (_Index == _Size) return append(move(_Val));
 
-	auto next = new ListNode<_Ty>();
-	next->value = move(_Val);
+	auto next = new ListNode<_Ty>(move(_Val));
 
 	_Insert_node(next, _Index);
 }
@@ -465,13 +464,12 @@ inline void LinkedList<_Ty>::_Copy_from(const LinkedList<_Ty>& _List)
 	}
 
 	auto it = _List.begin();
-	_Begin = new ListNode<_Ty>();
-	_Begin->value = *it;
+	_Begin = new ListNode<_Ty>(*it);
+
 	auto _Tmp = _Begin;
 
 	while (++it != _List.end()) {
-		auto node = new ListNode<_Ty>();
-		node->value = *it;
+		auto node = new ListNode<_Ty>(*it);
 		node->prev = _Tmp;
 		_Tmp->next = node;
 		_Tmp = _Tmp->next;
@@ -516,18 +514,19 @@ public:
 		: value(move(_Val))
 	{ }
 	ListNode(const ListNode& other)
-	{
-		_Copy_from(other);
-	}
-	ListNode(ListNode&& other)
+		: value(other.value)
 	{
 		next = other.next;
 		prev = other.prev;
-		value = move(other.value);
+	}
+	ListNode(ListNode&& other)
+		: value(move(other.value))
+	{
+		next = other.next;
+		prev = other.prev;
 
 		other.next = NULL;
 		other.prev = NULL;
-		other.value.~_Ty();
 	}
 	ListNode& operator=(const ListNode& other)
 	{
@@ -538,11 +537,11 @@ public:
 	{
 		next = other.next;
 		prev = other.prev;
-		value = move(other.value);
+		value.~_Ty();
+		new (&value) _Ty(move(value));
 
 		other.next = NULL;
 		other.prev = NULL;
-		other.value.~_Ty();
 		return *this;
 	}
 private:
@@ -550,10 +549,11 @@ private:
 	{
 		next = other.next;
 		prev = other.prev;
-		value = other.value;
+		value.~_Ty();
+		new (&value) _Ty(other.value);
 	}
 };
-\
+
 //
 //	ITERATOR
 //
@@ -614,3 +614,4 @@ inline bool LinkedListIterator<_Ty>::operator!=(const LinkedListIterator<_Ty>& _
 	return _List != _Right._List;
 }
 
+#pragma pack(pop)

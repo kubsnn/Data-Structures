@@ -111,24 +111,32 @@ constexpr void intro_sort(_Ty* const& _Data, int left, int right, int depth, _Pr
 template <class _Iter>
 inline constexpr void sort(_Iter _First, _Iter _Last) {
     const size_t size = _Last - _First;
-    int max_depth = 2 * log2(size);
+    int max_depth = 2 * static_cast<int>(log2(size));
     intro_sort(_First, 0, size - 1, max_depth, greater<>{});
 }
 
 template <class _Iter, class _Pr>
 inline constexpr void sort(_Iter _First, _Iter _Last, _Pr _Pred) {
     const size_t size = _Last - _First;
-    int max_depth = 2 * log2(size);
+    int max_depth = 2 * static_cast<int>(log2(size));
     intro_sort(_First, 0, size - 1, max_depth, _Pred);
 }
 
-
+template <class _Ty, template<class _T = _Ty> class _Container>
+inline constexpr _Container<_Ty> range1(size_t _Count)
+{
+    _Container<_Ty> _Data;
+    for (size_t i = 0; i < _Count; ++i) {
+        _Data.append(i);
+    }
+    return _Data;
+}
 
 template <class _Ty, template<class _T = _Ty> class _Container>
 inline constexpr _Container<_Ty> range(size_t _Count, int _Step)
 {
     _Container<_Ty> _Data;
-    size_t next = _Step > 0 ? 0 : (int)(1 - _Count) * _Step;
+    size_t next = static_cast<size_t>(_Step > 0 ? 0 : (int)(1 - _Count) * _Step);
     for (size_t i = 0; i < _Count; ++i, next += _Step) {
         _Data.append(next);
     }
@@ -138,13 +146,13 @@ inline constexpr _Container<_Ty> range(size_t _Count, int _Step)
 template <class _Ty, template<class _T = _Ty> class _Container>
 inline constexpr _Container<_Ty> range(size_t _Count)
 {
-    return range<_Ty, _Container>(_Count, 1);
+    return range1<_Ty, _Container>(_Count);
 }
 
 template <class _Array>
 inline constexpr _Array range(int _Step)
 {
-    _Array _Data;
+    _Array _Data{};
     size_t next = _Step > 0 ? 0 : (int)(1 - _Data.size()) * _Step;
     for (size_t i = 0; i < _Data.size(); ++i, next += _Step) {
         _Data[i] = next;
