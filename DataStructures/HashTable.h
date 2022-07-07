@@ -2,7 +2,7 @@
 
 #include "Utility.h"
 #include "Hash.h"
-#include "CompressedPair.h"
+#include "compressed_pair.h"
 #include "LinkedList.h"
 
 #pragma pack (push, 1)
