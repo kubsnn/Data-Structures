@@ -171,3 +171,16 @@ inline constexpr size_t distance(const FwdIt _First, const FwdIt _Last) {
 	}
 	return _Dist;
 }
+
+template <class _Ty>
+struct remove_const {
+	using type = _Ty;
+};
+
+template <class _Ty>
+struct remove_const<const _Ty> {
+	using type = _Ty;
+};
+
+template <class _Ty>
+using remove_const_t = typename remove_const<_Ty>::type;

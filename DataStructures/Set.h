@@ -2,7 +2,7 @@
 
 #include "Utility.h"
 #include "Hash.h"
-#include "CompressedPair.h"
+#include "compressed_pair.h"
 #include "HashTable.h"
 
 
@@ -10,31 +10,31 @@
 
 struct SetEmptyEl{};
 
-template <class _TValue>
+template <class _Ty>
 struct ConstSetIterator;
 
-template <class _TValue>
-class Set : protected HashTable<_TValue, SetEmptyEl>
+template <class _Ty>
+class Set : protected HashTable<_Ty, SetEmptyEl>
 {
 public:
-	using base = HashTable<_TValue, SetEmptyEl>;
-	using const_iterator = ConstSetIterator<const _TValue>;
+	using base = HashTable<_Ty, SetEmptyEl>;
+	using const_iterator = ConstSetIterator<const _Ty>;
 	
 
 	Set();
 	Set(const Set& _Set);
 	Set(Set&& _Set) noexcept;
 
-	void insert(const _TValue& _Val);
-	void insert(_TValue&& _Val) noexcept;
+	void insert(const _Ty& _Val);
+	void insert(_Ty&& _Val) noexcept;
 	template <class _FwdIt>
 	void insert(_FwdIt _First, const _FwdIt _Last);
 	template <class ..._Values>
 	void emplace(_Values&&... _Vals);
 
-	bool remove(const _TValue& _Val);
+	bool remove(const _Ty& _Val);
 
-	const_iterator find(const _TValue& _Key) const;
+	const_iterator find(const _Ty& _Key) const;
 
 	constexpr const_iterator begin() const;
 	constexpr const_iterator end() const;
@@ -47,70 +47,70 @@ public:
 	void clear();
 };
 
-template<class _TValue>
-inline Set<_TValue>::Set()
+template<class _Ty>
+inline Set<_Ty>::Set()
 	: base()
 { }
 
-template<class _TValue>
-inline Set<_TValue>::Set(const Set& _Set)
+template<class _Ty>
+inline Set<_Ty>::Set(const Set& _Set)
 	: base(_Set)
 { }
 
-template<class _TValue>
-inline Set<_TValue>::Set(Set&& _Set) noexcept
+template<class _Ty>
+inline Set<_Ty>::Set(Set&& _Set) noexcept
 	: base(move(_Set))
 { }
 
-template<class _TValue>
-inline constexpr Set<_TValue>::const_iterator Set<_TValue>::begin() const
+template<class _Ty>
+inline constexpr Set<_Ty>::const_iterator Set<_Ty>::begin() const
 {
 	return const_iterator(this->_Buckets, this->_BucketCount);
 }
 
-template<class _TValue>
-inline constexpr Set<_TValue>::const_iterator Set<_TValue>::end() const
+template<class _Ty>
+inline constexpr Set<_Ty>::const_iterator Set<_Ty>::end() const
 {
 	return const_iterator(this->_Buckets + this->_BucketCount, 0);
 }
 
-template<class _TValue>
-inline void Set<_TValue>::insert(const _TValue & _Val)
+template<class _Ty>
+inline void Set<_Ty>::insert(const _Ty & _Val)
 {
 	base::insert(_Val, SetEmptyEl{});
 }
 
-template<class _TValue>
-inline void Set<_TValue>::insert(_TValue&& _Val) noexcept
+template<class _Ty>
+inline void Set<_Ty>::insert(_Ty&& _Val) noexcept
 {
 	base::insert(move(_Val), SetEmptyEl{});
 }
 
-template<class _TValue>
+template<class _Ty>
 template<class _FwdIt>
-inline void Set<_TValue>::insert(_FwdIt _First, const _FwdIt _Last)
+inline void Set<_Ty>::insert(_FwdIt _First, const _FwdIt _Last)
 {
 	for (; _First != _Last; ++_First) {
 		base::insert(*_First, SetEmptyEl{});
 	}
 }
 
-template<class _TValue>
+template<class _Ty>
 template<class ..._Values>
-inline void Set<_TValue>::emplace(_Values&&... _Vals)
+inline void Set<_Ty>::emplace(_Values&&... _Vals)
 {
-	base::insert(_TValue(forward<_Values>(_Vals)...), SetEmptyEl{});
+	base::insert(_Ty(forward<_Values>(_Vals)...), SetEmptyEl{});
 }
 
 
-template<class _TValue>
-inline bool Set<_TValue>::remove(const _TValue& _Val)
+template<class _Ty>
+inline bool Set<_Ty>::remove(const _Ty& _Val)
 {
 	return base::remove(_Val);
 }
 
-template<class _TValue>
-inline Set<_TValue>::const_iterator Set<_TValue>::find(const _TValue& _Key) const
+template<class _Ty>
+inline Set<_Ty>::const_iterator Set<_Ty>::find(const _Ty& _Key) const
 {
 	size_t index = this->_Bucket_index(_Key);
 
@@ -124,17 +124,17 @@ inline Set<_TValue>::const_iterator Set<_TValue>::find(const _TValue& _Key) cons
 	return this->end();
 }
 
-template<class _TValue>
-inline Set<_TValue>& Set<_TValue>::operator=(const Set& _Set)
+template<class _Ty>
+inline Set<_Ty>& Set<_Ty>::operator=(const Set& _Set)
 {
 	base::_Clear();
-	base::_Buckets = new LinkedList<compressed_pair<_TValue, SetEmptyEl>>*[_Set._BucketCount];
+	base::_Buckets = new LinkedList<compressed_pair<_Ty, SetEmptyEl>>*[_Set._BucketCount];
 	base::_Copy_from(_Set);
 	return *this;
 }
 
-template<class _TValue>
-inline Set<_TValue>& Set<_TValue>::operator=(Set&& _Set) noexcept
+template<class _Ty>
+inline Set<_Ty>& Set<_Ty>::operator=(Set&& _Set) noexcept
 {
 	this->_Clear();
 	this->_BucketCount = move(_Set._BucketCount);
@@ -147,14 +147,14 @@ inline Set<_TValue>& Set<_TValue>::operator=(Set&& _Set) noexcept
 	return *this;
 }
 
-template<class _TValue>
-inline bool Set<_TValue>::operator==(const Set& _Set) const
+template<class _Ty>
+inline bool Set<_Ty>::operator==(const Set& _Set) const
 {
 	return base::operator==(_Set);
 }
 
-template<class _TValue>
-inline void Set<_TValue>::clear()
+template<class _Ty>
+inline void Set<_Ty>::clear()
 {
 	base::clear();
 }
@@ -163,49 +163,50 @@ inline void Set<_TValue>::clear()
 ///	 ITERATOR
 /// 
 
-template <class _TValue>
-struct ConstSetIterator : public HashTableIterator<_TValue, SetEmptyEl>
+template <class _Ty>
+struct ConstSetIterator : public HashTableIterator<compressed_pair<_Ty, SetEmptyEl>>
 {
 public:
-	using base = HashTableIterator<_TValue, SetEmptyEl>;
+	using base = HashTableIterator<compressed_pair<_Ty, SetEmptyEl>>;
 	using base::base;
-	friend class Set<_TValue>;
-	const _TValue& operator*();
-	ConstSetIterator<_TValue>& operator++();
-	ConstSetIterator<_TValue> operator++(int);
+	friend class Set<_Ty>;
+	const _Ty& operator*();
+	ConstSetIterator<_Ty>& operator++();
+	ConstSetIterator<_Ty> operator++(int);
 };
 
-template<class _TValue>
-inline const _TValue& ConstSetIterator<_TValue>::operator*()
+template<class _Ty>
+inline const _Ty& ConstSetIterator<_Ty>::operator*()
 {
 	return base::operator*().first();
 }
 
-template<class _TValue>
-inline ConstSetIterator<_TValue>& ConstSetIterator<_TValue>::operator++()
+template<class _Ty>
+inline ConstSetIterator<_Ty>& ConstSetIterator<_Ty>::operator++()
 {
 	base::operator++();
 	return *this;
 }
 
-template<class _TValue>
-inline ConstSetIterator<_TValue> ConstSetIterator<_TValue>::operator++(int)
+template<class _Ty>
+inline ConstSetIterator<_Ty> ConstSetIterator<_Ty>::operator++(int)
 {
 	auto p = *this;
 	base::operator++();
 	return p;
 }
 
-template<class _TValue>
-struct Hash<Set<_TValue>>
+template<class _Ty>
+struct Hash<Set<_Ty>>
 {
-	size_t operator()(const Set<_TValue>& _Table)
+	size_t operator()(const Set<_Ty>& _Set)
 	{
 		size_t hash = 0;
 		size_t power = 1;
-		const int mod = static_cast<int>(1e9) + 7;
-		for (const auto& e : _Table) {
-			hash = (hash + Hash<_TValue>()(e) * power) % mod;
+		constexpr int mod = static_cast<int>(1e9) + 7;
+		Hash<_Ty> hasher;
+		for (const auto& e : _Set) {
+			hash = (hash + hasher(e) * power) % mod;
 
 			power = (power * 31) % mod;
 		}

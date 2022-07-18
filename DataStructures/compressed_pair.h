@@ -6,6 +6,8 @@ template <class _Ty1, class _Ty2, bool = __is_empty(_Ty2)>
 struct compressed_pair : private _Ty2
 {
 public:
+	using first_type = _Ty1;
+	using second_type = _Ty2;
 	compressed_pair() 
 	{ }
 	compressed_pair(const compressed_pair& _Other)
@@ -84,6 +86,8 @@ template <class _Ty1, class _Ty2>
 struct compressed_pair<_Ty1, _Ty2, false>
 {
 public:
+	using first_type = _Ty1;
+	using second_type = _Ty2;
 	compressed_pair()
 	{ }
 	compressed_pair(const compressed_pair& _Other)
