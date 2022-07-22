@@ -11,19 +11,18 @@
 struct SetEmptyEl{};
 
 template <class _Ty>
-struct ConstSetIterator;
+struct set_const_iterator;
 
 template <class _Ty>
-class Set : protected HashTable<_Ty, SetEmptyEl>
+class set : protected hashtable<_Ty, SetEmptyEl>
 {
 public:
-	using base = HashTable<_Ty, SetEmptyEl>;
-	using const_iterator = ConstSetIterator<const _Ty>;
+	using base = hashtable<_Ty, SetEmptyEl>;
+	using const_iterator = set_const_iterator<const _Ty>;
 	
-
-	Set();
-	Set(const Set& _Set);
-	Set(Set&& _Set) noexcept;
+	set();
+	set(const set& _Set);
+	set(set&& _Set) noexcept;
 
 	void insert(const _Ty& _Val);
 	void insert(_Ty&& _Val) noexcept;
@@ -39,56 +38,56 @@ public:
 	constexpr const_iterator begin() const;
 	constexpr const_iterator end() const;
 
-	Set& operator=(const Set& _Table);
-	Set& operator=(Set&& _Table) noexcept;
+	set& operator=(const set& _Table);
+	set& operator=(set&& _Table) noexcept;
 
-	bool operator==(const Set& _Set) const;
+	bool operator==(const set& _Set) const;
 
 	void clear();
 };
 
 template<class _Ty>
-inline Set<_Ty>::Set()
+inline set<_Ty>::set()
 	: base()
 { }
 
 template<class _Ty>
-inline Set<_Ty>::Set(const Set& _Set)
+inline set<_Ty>::set(const set& _Set)
 	: base(_Set)
 { }
 
 template<class _Ty>
-inline Set<_Ty>::Set(Set&& _Set) noexcept
+inline set<_Ty>::set(set&& _Set) noexcept
 	: base(move(_Set))
 { }
 
 template<class _Ty>
-inline constexpr Set<_Ty>::const_iterator Set<_Ty>::begin() const
+inline constexpr set_const_iterator<const _Ty> set<_Ty>::begin() const
 {
 	return const_iterator(this->_Buckets, this->_BucketCount);
 }
 
 template<class _Ty>
-inline constexpr Set<_Ty>::const_iterator Set<_Ty>::end() const
+inline constexpr set_const_iterator<const _Ty> set<_Ty>::end() const
 {
 	return const_iterator(this->_Buckets + this->_BucketCount, 0);
 }
 
 template<class _Ty>
-inline void Set<_Ty>::insert(const _Ty & _Val)
+inline void set<_Ty>::insert(const _Ty& _Val)
 {
 	base::insert(_Val, SetEmptyEl{});
 }
 
 template<class _Ty>
-inline void Set<_Ty>::insert(_Ty&& _Val) noexcept
+inline void set<_Ty>::insert(_Ty&& _Val) noexcept
 {
 	base::insert(move(_Val), SetEmptyEl{});
 }
 
 template<class _Ty>
 template<class _FwdIt>
-inline void Set<_Ty>::insert(_FwdIt _First, const _FwdIt _Last)
+inline void set<_Ty>::insert(_FwdIt _First, const _FwdIt _Last)
 {
 	for (; _First != _Last; ++_First) {
 		base::insert(*_First, SetEmptyEl{});
@@ -97,20 +96,20 @@ inline void Set<_Ty>::insert(_FwdIt _First, const _FwdIt _Last)
 
 template<class _Ty>
 template<class ..._Values>
-inline void Set<_Ty>::emplace(_Values&&... _Vals)
+inline void set<_Ty>::emplace(_Values&&... _Vals)
 {
 	base::insert(_Ty(forward<_Values>(_Vals)...), SetEmptyEl{});
 }
 
 
 template<class _Ty>
-inline bool Set<_Ty>::remove(const _Ty& _Val)
+inline bool set<_Ty>::remove(const _Ty& _Val)
 {
 	return base::remove(_Val);
 }
 
 template<class _Ty>
-inline Set<_Ty>::const_iterator Set<_Ty>::find(const _Ty& _Key) const
+inline set_const_iterator<const _Ty> set<_Ty>::find(const _Ty& _Key) const
 {
 	size_t index = this->_Bucket_index(_Key);
 
@@ -125,16 +124,16 @@ inline Set<_Ty>::const_iterator Set<_Ty>::find(const _Ty& _Key) const
 }
 
 template<class _Ty>
-inline Set<_Ty>& Set<_Ty>::operator=(const Set& _Set)
+inline set<_Ty>& set<_Ty>::operator=(const set& _Set)
 {
 	base::_Clear();
-	base::_Buckets = new LinkedList<compressed_pair<_Ty, SetEmptyEl>>*[_Set._BucketCount];
+	base::_Buckets = new forward_list<compressed_pair<_Ty, SetEmptyEl>>*[_Set._BucketCount];
 	base::_Copy_from(_Set);
 	return *this;
 }
 
 template<class _Ty>
-inline Set<_Ty>& Set<_Ty>::operator=(Set&& _Set) noexcept
+inline set<_Ty>& set<_Ty>::operator=(set&& _Set) noexcept
 {
 	this->_Clear();
 	this->_BucketCount = move(_Set._BucketCount);
@@ -148,13 +147,13 @@ inline Set<_Ty>& Set<_Ty>::operator=(Set&& _Set) noexcept
 }
 
 template<class _Ty>
-inline bool Set<_Ty>::operator==(const Set& _Set) const
+inline bool set<_Ty>::operator==(const set& _Set) const
 {
 	return base::operator==(_Set);
 }
 
 template<class _Ty>
-inline void Set<_Ty>::clear()
+inline void set<_Ty>::clear()
 {
 	base::clear();
 }
@@ -164,32 +163,32 @@ inline void Set<_Ty>::clear()
 /// 
 
 template <class _Ty>
-struct ConstSetIterator : public HashTableIterator<compressed_pair<_Ty, SetEmptyEl>>
+struct set_const_iterator : public hashtable_iterator<compressed_pair<_Ty, SetEmptyEl>>
 {
 public:
-	using base = HashTableIterator<compressed_pair<_Ty, SetEmptyEl>>;
+	using base = hashtable_iterator<compressed_pair<_Ty, SetEmptyEl>>;
 	using base::base;
-	friend class Set<_Ty>;
+	friend class set<_Ty>;
 	const _Ty& operator*();
-	ConstSetIterator<_Ty>& operator++();
-	ConstSetIterator<_Ty> operator++(int);
+	set_const_iterator<_Ty>& operator++();
+	set_const_iterator<_Ty> operator++(int);
 };
 
 template<class _Ty>
-inline const _Ty& ConstSetIterator<_Ty>::operator*()
+inline const _Ty& set_const_iterator<_Ty>::operator*()
 {
 	return base::operator*().first();
 }
 
 template<class _Ty>
-inline ConstSetIterator<_Ty>& ConstSetIterator<_Ty>::operator++()
+inline set_const_iterator<_Ty>& set_const_iterator<_Ty>::operator++()
 {
 	base::operator++();
 	return *this;
 }
 
 template<class _Ty>
-inline ConstSetIterator<_Ty> ConstSetIterator<_Ty>::operator++(int)
+inline set_const_iterator<_Ty> set_const_iterator<_Ty>::operator++(int)
 {
 	auto p = *this;
 	base::operator++();
@@ -197,9 +196,9 @@ inline ConstSetIterator<_Ty> ConstSetIterator<_Ty>::operator++(int)
 }
 
 template<class _Ty>
-struct Hash<Set<_Ty>>
+struct Hash<set<_Ty>>
 {
-	size_t operator()(const Set<_Ty>& _Set)
+	size_t operator()(const set<_Ty>& _Set)
 	{
 		size_t hash = 0;
 		size_t power = 1;
