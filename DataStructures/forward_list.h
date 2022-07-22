@@ -276,7 +276,7 @@ inline const _Ty& forward_list<_Ty>::at(unsigned int _Index) const
 }
 
 template<class _Ty>
-inline forward_list<_Ty>::iterator forward_list<_Ty>::find(const _Ty& _Val)
+inline forward_list_iterator<_Ty> forward_list<_Ty>::find(const _Ty& _Val)
 {
 	for (node* _Tmp = _Head; _Tmp != nullptr; _Tmp = _Tmp->_Next) {
 		if (_Tmp->_Value == _Val) return iterator(_Tmp);
@@ -285,7 +285,7 @@ inline forward_list<_Ty>::iterator forward_list<_Ty>::find(const _Ty& _Val)
 }
 
 template<class _Ty>
-inline forward_list<_Ty>::const_iterator forward_list<_Ty>::find(const _Ty& _Val) const
+inline forward_list_iterator<const _Ty> forward_list<_Ty>::find(const _Ty& _Val) const
 {
 	for (node* _Tmp = _Head; _Tmp != nullptr; _Tmp = _Tmp->_Next) {
 		if (_Tmp->_Value == _Val) return iterator(_Tmp);
@@ -294,25 +294,25 @@ inline forward_list<_Ty>::const_iterator forward_list<_Ty>::find(const _Ty& _Val
 }
 
 template <class _Ty>
-inline forward_list<_Ty>::iterator forward_list<_Ty>::begin()
+inline forward_list_iterator<_Ty> forward_list<_Ty>::begin()
 {
 	return iterator(_Head);
 }
 
 template <class _Ty>
-inline forward_list<_Ty>::const_iterator forward_list<_Ty>::begin() const
+inline forward_list_iterator<const _Ty> forward_list<_Ty>::begin() const
 {
 	return const_iterator(_Head);
 }
 
 template <class _Ty>
-inline forward_list<_Ty>::iterator forward_list<_Ty>::end()
+inline forward_list_iterator<_Ty> forward_list<_Ty>::end()
 {
 	return iterator(nullptr);
 }
 
 template <class _Ty>
-inline forward_list<_Ty>::const_iterator forward_list<_Ty>::end() const
+inline forward_list_iterator<const _Ty> forward_list<_Ty>::end() const
 {
 	return const_iterator(nullptr);
 }

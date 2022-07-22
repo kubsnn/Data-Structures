@@ -35,12 +35,12 @@ struct Hash<Pair<_Ty1, _Ty2>>
 };
 
 template <class _Ty>
-constexpr const _Ty& max(const _Ty& _Left, const _Ty& _Right) {
+inline constexpr const _Ty& max(const _Ty& _Left, const _Ty& _Right) {
 	return _Left < _Right ? _Right : _Left;
 }
 
 template <class _Ty>
-constexpr const _Ty& min(const _Ty& _Left, const _Ty& _Right) {
+inline constexpr const _Ty& min(const _Ty& _Left, const _Ty& _Right) {
 	return _Left > _Right ? _Right : _Left;
 }
 
@@ -78,7 +78,7 @@ inline constexpr remove_reference_t<_Ty>&& move(_Ty& _Arg) noexcept {
 }
 
 template <class _Ty>
-inline void swap(_Ty& _Left, _Ty& _Right) {
+inline constexpr void swap(_Ty& _Left, _Ty& _Right) {
 	_Ty _Tmp(move(_Right));
 	_Right = move(_Left);
 	_Left = move(_Tmp);

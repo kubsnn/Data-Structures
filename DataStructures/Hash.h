@@ -53,7 +53,11 @@ struct Hash<double>
 template<>
 struct Hash<std::string>
 {
+#if __cplusplus >= 202002L
 	constexpr size_t operator()(const std::string& s) const
+#else
+	inline size_t operator()(const std::string& s) const
+#endif
 	{
 		size_t sum = 1;
 		size_t n = s.length();

@@ -8,22 +8,22 @@
 #pragma pack (push, 1)
 
 template<class _Ty>
-struct HashTableIterator;
+struct hashtable_iterator;
 
 
 template<class _TKey, class _TValue>
-class HashTable
+class hashtable
 {
 public:
 	using pair = compressed_pair<const _TKey, _TValue>;
 	using bucket_type = forward_list<pair>*;
-	using iterator = HashTableIterator<pair>;
-	using const_iterator = HashTableIterator<const pair>;
+	using iterator = hashtable_iterator<pair>; // [C++20 >] hashtable_iterator<compressed_pair<const _TKey, _TValue>>
+	using const_iterator = hashtable_iterator<const pair>;
 
-	HashTable();
-	HashTable(const HashTable& _Table);
-	HashTable(HashTable&& _Table) noexcept;
-	~HashTable();
+	hashtable();
+	hashtable(const hashtable& _Table);
+	hashtable(hashtable&& _Table) noexcept;
+	~hashtable();
 
 	constexpr void insert(const _TKey& _Key, const _TValue& _Val);
 	constexpr void insert(const _TKey& _Key, _TValue&& _Val);
@@ -49,10 +49,10 @@ public:
 	constexpr _TValue& operator[](const _TKey& _Key);
 	constexpr const _TValue& operator[](const _TKey& _Key) const;
 
-	constexpr HashTable& operator=(const HashTable& _Table);
-	constexpr HashTable& operator=(HashTable&& _Table) noexcept;
+	constexpr hashtable& operator=(const hashtable& _Table);
+	constexpr hashtable& operator=(hashtable&& _Table) noexcept;
 
-	constexpr bool operator==(const HashTable& _Table) const;
+	constexpr bool operator==(const hashtable& _Table) const;
 	
 	constexpr void clear();
 protected:
@@ -67,12 +67,12 @@ protected:
 	constexpr void _Try_resize();
 	constexpr void _Rehash(size_t _NewSize);
 
-	constexpr void _Copy_from(const HashTable<_TKey, _TValue>& _Table);
+	constexpr void _Copy_from(const hashtable<_TKey, _TValue>& _Table);
 	constexpr void _Clear();
 };
 
 template<class _TKey, class _TValue>
-inline HashTable<_TKey, _TValue>::HashTable()
+inline hashtable<_TKey, _TValue>::hashtable()
 {
 	_Mask = _BucketCount - 1;
 	_Buckets = new bucket_type [_BucketCount];
@@ -80,14 +80,14 @@ inline HashTable<_TKey, _TValue>::HashTable()
 }
 
 template<class _TKey, class _TValue>
-inline HashTable<_TKey, _TValue>::HashTable(const HashTable<_TKey, _TValue>& _Table)
+inline hashtable<_TKey, _TValue>::hashtable(const hashtable<_TKey, _TValue>& _Table)
 {
 	_Buckets = new bucket_type[_Table._BucketCount];
 	_Copy_from(_Table);
 }
 
 template<class _TKey, class _TValue>
-inline HashTable<_TKey, _TValue>::HashTable(HashTable<_TKey, _TValue>&& _Table) noexcept
+inline hashtable<_TKey, _TValue>::hashtable(hashtable<_TKey, _TValue>&& _Table) noexcept
 {
 	_BucketCount = _Table._BucketCount;
 	_Count = _Table._Count;
@@ -97,13 +97,13 @@ inline HashTable<_TKey, _TValue>::HashTable(HashTable<_TKey, _TValue>&& _Table) 
 }
 
 template<class _TKey, class _TValue>
-inline HashTable<_TKey, _TValue>::~HashTable()
+inline hashtable<_TKey, _TValue>::~hashtable()
 {
 	_Clear();
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::insert(const _TKey& _Key, const _TValue& _Val)
+inline constexpr void hashtable<_TKey, _TValue>::insert(const _TKey& _Key, const _TValue& _Val)
 {
 	compressed_pair<const _TKey, _TValue> pair(_Key, _Val);
 
@@ -111,7 +111,7 @@ inline constexpr void HashTable<_TKey, _TValue>::insert(const _TKey& _Key, const
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::insert(const _TKey& _Key, _TValue&& _Val)
+inline constexpr void hashtable<_TKey, _TValue>::insert(const _TKey& _Key, _TValue&& _Val)
 {
 	compressed_pair<const _TKey, _TValue> pair(_Key, move(_Val));
 
@@ -119,7 +119,7 @@ inline constexpr void HashTable<_TKey, _TValue>::insert(const _TKey& _Key, _TVal
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::insert(_TKey&& _Key, _TValue&& _Val) noexcept
+inline constexpr void hashtable<_TKey, _TValue>::insert(_TKey&& _Key, _TValue&& _Val) noexcept
 {
 	compressed_pair<const _TKey, _TValue> pair(move(_Key), move(_Val));
 
@@ -128,7 +128,7 @@ inline constexpr void HashTable<_TKey, _TValue>::insert(_TKey&& _Key, _TValue&& 
 
 template<class _TKey, class _TValue>
 template<class ..._Values>
-inline constexpr void HashTable<_TKey, _TValue>::emplace(const _TKey& _Key, _Values&&... _Vals) noexcept
+inline constexpr void hashtable<_TKey, _TValue>::emplace(const _TKey& _Key, _Values&&... _Vals) noexcept
 {
 	compressed_pair<const _TKey, _TValue> pair(_Key, forward<_Values>(_Vals)...);
 
@@ -137,7 +137,7 @@ inline constexpr void HashTable<_TKey, _TValue>::emplace(const _TKey& _Key, _Val
 
 template<class _TKey, class _TValue>
 template<class ..._Values>
-inline constexpr void HashTable<_TKey, _TValue>::emplace(_TKey&& _Key, _Values&&... _Vals) noexcept
+inline constexpr void hashtable<_TKey, _TValue>::emplace(_TKey&& _Key, _Values&&... _Vals) noexcept
 {
 	compressed_pair<const _TKey, _TValue> pair(move(_Key), forward<_Values>(_Vals)...);
 
@@ -145,7 +145,7 @@ inline constexpr void HashTable<_TKey, _TValue>::emplace(_TKey&& _Key, _Values&&
 }
 
 template<class _TKey, class _TValue>
-inline constexpr _TValue& HashTable<_TKey, _TValue>::find(const _TKey& _Key)
+inline constexpr _TValue& hashtable<_TKey, _TValue>::find(const _TKey& _Key)
 {
 	size_t index = _Bucket_index(_Key);
 
@@ -155,7 +155,7 @@ inline constexpr _TValue& HashTable<_TKey, _TValue>::find(const _TKey& _Key)
 }
 
 template<class _TKey, class _TValue>
-inline constexpr const _TValue& HashTable<_TKey, _TValue>::find(const _TKey& _Key) const
+inline constexpr const _TValue& hashtable<_TKey, _TValue>::find(const _TKey& _Key) const
 {
 	size_t index = _Bucket_index(_Key);
 
@@ -165,7 +165,7 @@ inline constexpr const _TValue& HashTable<_TKey, _TValue>::find(const _TKey& _Ke
 }
 
 template<class _TKey, class _TValue>
-inline constexpr bool HashTable<_TKey, _TValue>::remove(const _TKey& _Key)
+inline constexpr bool hashtable<_TKey, _TValue>::remove(const _TKey& _Key)
 {
 	size_t index = _Bucket_index(_Key);
 
@@ -190,55 +190,55 @@ inline constexpr bool HashTable<_TKey, _TValue>::remove(const _TKey& _Key)
 }
 
 template<class _TKey, class _TValue>
-inline constexpr size_t HashTable<_TKey, _TValue>::size() const
+inline constexpr size_t hashtable<_TKey, _TValue>::size() const
 {
 	return _Count;
 }
 
 template<class _TKey, class _TValue>
-inline constexpr size_t HashTable<_TKey, _TValue>::bucket_count() const
+inline constexpr size_t hashtable<_TKey, _TValue>::bucket_count() const
 {
 	return _BucketCount;
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>::iterator HashTable<_TKey, _TValue>::begin()
+inline constexpr hashtable_iterator<compressed_pair<const _TKey, _TValue>> hashtable<_TKey, _TValue>::begin()
 {
 	return iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>::const_iterator HashTable<_TKey, _TValue>::begin() const
+inline constexpr hashtable_iterator<const compressed_pair<const _TKey, _TValue>> hashtable<_TKey, _TValue>::begin() const
 {
 	return const_iterator(_Buckets, _BucketCount);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>::iterator HashTable<_TKey, _TValue>::end()
+inline constexpr hashtable_iterator<compressed_pair<const _TKey, _TValue>> hashtable<_TKey, _TValue>::end()
 {
 	return iterator(_Buckets + _BucketCount, 0);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>::const_iterator HashTable<_TKey, _TValue>::end() const
+inline constexpr hashtable_iterator<const compressed_pair<const _TKey, _TValue>> hashtable<_TKey, _TValue>::end() const
 {
 	return const_iterator(_Buckets + _BucketCount, 0);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr _TValue& HashTable<_TKey, _TValue>::operator[](const _TKey& _Key)
+inline constexpr _TValue& hashtable<_TKey, _TValue>::operator[](const _TKey& _Key)
 {
 	return find(_Key);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr const _TValue& HashTable<_TKey, _TValue>::operator[](const _TKey& _Key) const
+inline constexpr const _TValue& hashtable<_TKey, _TValue>::operator[](const _TKey& _Key) const
 {
 	return find(_Key);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(const HashTable<_TKey, _TValue>& _Table)
+inline constexpr hashtable<_TKey, _TValue>& hashtable<_TKey, _TValue>::operator=(const hashtable<_TKey, _TValue>& _Table)
 {
 	_Clear();
 	_Buckets = new forward_list<compressed_pair<_TKey, _TValue>>* [_Table._BucketCount];
@@ -247,7 +247,7 @@ inline constexpr HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=
 }
 
 template<class _TKey, class _TValue>
-inline constexpr HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=(HashTable<_TKey, _TValue>&& _Table) noexcept
+inline constexpr hashtable<_TKey, _TValue>& hashtable<_TKey, _TValue>::operator=(hashtable<_TKey, _TValue>&& _Table) noexcept
 {
 	_Clear();
 	_BucketCount = move(_Table._BucketCount);
@@ -259,7 +259,7 @@ inline constexpr HashTable<_TKey, _TValue>& HashTable<_TKey, _TValue>::operator=
 }
 
 template<class _TKey, class _TValue>
-inline constexpr bool HashTable<_TKey, _TValue>::operator==(const HashTable& _Table) const
+inline constexpr bool hashtable<_TKey, _TValue>::operator==(const hashtable& _Table) const
 {
 	if (_Count != _Table._Count) return false;
 
@@ -290,7 +290,7 @@ inline constexpr bool HashTable<_TKey, _TValue>::operator==(const HashTable& _Ta
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::clear()
+inline constexpr void hashtable<_TKey, _TValue>::clear()
 {
 	_Clear();
 	_BucketCount = 8;
@@ -301,7 +301,7 @@ inline constexpr void HashTable<_TKey, _TValue>::clear()
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::_Insert(compressed_pair<const _TKey, _TValue>& _Pair)
+inline constexpr void hashtable<_TKey, _TValue>::_Insert(compressed_pair<const _TKey, _TValue>& _Pair)
 {
 	_Try_resize();
 	size_t index = _Bucket_index(_Pair.first());
@@ -314,20 +314,20 @@ inline constexpr void HashTable<_TKey, _TValue>::_Insert(compressed_pair<const _
 }
 
 template<class _TKey, class _TValue>
-inline constexpr size_t HashTable<_TKey, _TValue>::_Bucket_index(const _TKey& _Key) const
+inline constexpr size_t hashtable<_TKey, _TValue>::_Bucket_index(const _TKey& _Key) const
 {
 	return Hash<_TKey>()(_Key) & _Mask;
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::_Try_resize()
+inline constexpr void hashtable<_TKey, _TValue>::_Try_resize()
 {
 	if (_Count > _BucketCount << 2) _Rehash(_BucketCount << 2);
 	else if (_Count > 8 && _Count < _BucketCount / 3) _Rehash(_BucketCount >> 2);
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::_Rehash(size_t _NewSize)
+inline constexpr void hashtable<_TKey, _TValue>::_Rehash(size_t _NewSize)
 {
 	auto _Prev_buckets = _Buckets;
 
@@ -353,7 +353,7 @@ inline constexpr void HashTable<_TKey, _TValue>::_Rehash(size_t _NewSize)
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::_Copy_from(const HashTable<_TKey, _TValue>& _Table)
+inline constexpr void hashtable<_TKey, _TValue>::_Copy_from(const hashtable<_TKey, _TValue>& _Table)
 {
 	_Mask = _Table._Mask;
 	_BucketCount = _Table._BucketCount;
@@ -368,7 +368,7 @@ inline constexpr void HashTable<_TKey, _TValue>::_Copy_from(const HashTable<_TKe
 }
 
 template<class _TKey, class _TValue>
-inline constexpr void HashTable<_TKey, _TValue>::_Clear()
+inline constexpr void hashtable<_TKey, _TValue>::_Clear()
 {
 	if (!_Buckets) return;
 
@@ -390,15 +390,15 @@ inline constexpr void HashTable<_TKey, _TValue>::_Clear()
 //
 
 template <class _Ty>
-struct HashTableIterator
+struct hashtable_iterator
 {
 public:
 	using bucket_type = forward_list<remove_const_t<_Ty>>*;
 	using first_type = typename _Ty::first_type;
 	using second_type = typename _Ty::second_type;
-	using iterator = HashTableIterator<_Ty>;
-	friend class HashTable<remove_const_t<first_type>, remove_const_t<second_type>>;
-	HashTableIterator(bucket_type* _List, size_t _Size);
+	using iterator = hashtable_iterator<_Ty>;
+	friend class hashtable<remove_const_t<first_type>, remove_const_t<second_type>>;
+	hashtable_iterator(bucket_type* _List, size_t _Size);
 
 	_Ty& operator*();
 	iterator& operator++();
@@ -415,7 +415,7 @@ private:
 };
 
 template <class _Ty>
-inline HashTableIterator<_Ty>::HashTableIterator(bucket_type* _List, size_t _Size)
+inline hashtable_iterator<_Ty>::hashtable_iterator(bucket_type* _List, size_t _Size)
 	: _List(_List)
 {
 	_BucketsLeft = (int)_Size;
@@ -426,20 +426,20 @@ inline HashTableIterator<_Ty>::HashTableIterator(bucket_type* _List, size_t _Siz
 }
 
 template <class _Ty>
-inline _Ty& HashTableIterator<_Ty>::operator*()
+inline _Ty& hashtable_iterator<_Ty>::operator*()
 {
 	return (*_List)->at(_CurrentBucketIndex);
 }
 
 template <class _Ty>
-inline HashTableIterator<_Ty>& HashTableIterator<_Ty>::operator++()
+inline hashtable_iterator<_Ty>& hashtable_iterator<_Ty>::operator++()
 {
 	find_next_value();
 	return *this;
 }
 
 template <class _Ty>
-inline HashTableIterator<_Ty> HashTableIterator<_Ty>::operator++(int)
+inline hashtable_iterator<_Ty> hashtable_iterator<_Ty>::operator++(int)
 {
 	auto p = *this;
 	find_next_value();
@@ -447,19 +447,19 @@ inline HashTableIterator<_Ty> HashTableIterator<_Ty>::operator++(int)
 }
 
 template <class _Ty>
-inline constexpr bool HashTableIterator<_Ty>::operator==(const iterator& _Right) const
+inline constexpr bool hashtable_iterator<_Ty>::operator==(const iterator& _Right) const
 {
 	return _List == _Right._List;
 }
 
 template <class _Ty>
-inline constexpr bool HashTableIterator<_Ty>::operator!=(const iterator& _Right) const
+inline constexpr bool hashtable_iterator<_Ty>::operator!=(const iterator& _Right) const
 {
 	return _List != _Right._List;
 }
 
 template<class _Ty>
-constexpr void HashTableIterator<_Ty>::find_next_value()
+constexpr void hashtable_iterator<_Ty>::find_next_value()
 {
 	while (*_List == NULL) {
 		if (_BucketsLeft == 0) return;
@@ -482,9 +482,9 @@ constexpr void HashTableIterator<_Ty>::find_next_value()
 }
 
 template<class _TKey, class _TValue>
-struct Hash<HashTable<_TKey, _TValue>>
+struct Hash<hashtable<_TKey, _TValue>>
 {
-	size_t operator()(const HashTable<_TKey, _TValue>& _Table) 
+	size_t operator()(const hashtable<_TKey, _TValue>& _Table) 
 	{
 		size_t hash = 0;
 		size_t power = 1;

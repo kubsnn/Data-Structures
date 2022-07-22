@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,17 +145,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
-    <ClInclude Include="Array.h" />
+    <ClInclude Include="array.h" />
+    <ClInclude Include="dynarray.h" />
     <ClInclude Include="forward_list.h" />
     <ClInclude Include="Hash.h" />
     <ClInclude Include="compressed_pair.h" />
-    <ClInclude Include="HashTable.h" />
+    <ClInclude Include="hashtable.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="rbtree.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="Utility.h" />
-    <ClInclude Include="Vector.h" />
+    <ClInclude Include="vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

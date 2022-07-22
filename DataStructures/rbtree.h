@@ -2,6 +2,8 @@
 
 #include "Utility.h"
 
+#pragma pack (push, 1)
+
 enum class rbcolor
 {
 	RED,
@@ -22,9 +24,9 @@ public:
 	using iterator = rbtree_iterator<_Ty>;
 	using const_iterator = rbtree_iterator<const _Ty>;
 
-	rbtree();
-	rbtree(const rbtree& _Other);
-	rbtree(rbtree&& _Other);
+	constexpr rbtree();
+	constexpr rbtree(const rbtree& _Other);
+	constexpr rbtree(rbtree&& _Other);
 	constexpr rbtree& operator=(const rbtree& _Other);
 	constexpr rbtree& operator=(rbtree&& _Other);
 
@@ -69,7 +71,7 @@ private:
 };
 
 template<class _Ty>
-inline rbtree<_Ty>::rbtree()
+inline constexpr rbtree<_Ty>::rbtree()
 {
 	_Super_root = new node();
 	_Super_root->color = rbcolor::RED;
@@ -77,13 +79,13 @@ inline rbtree<_Ty>::rbtree()
 }
 
 template<class _Ty>
-inline rbtree<_Ty>::rbtree(const rbtree& _Other)
+inline constexpr rbtree<_Ty>::rbtree(const rbtree& _Other)
 {
 	_Copy(_Other);
 }
 
 template<class _Ty>
-inline rbtree<_Ty>::rbtree(rbtree&& _Other)
+inline constexpr rbtree<_Ty>::rbtree(rbtree&& _Other)
 {
 	_Move(move(_Other));
 }
@@ -105,7 +107,7 @@ inline constexpr rbtree<_Ty>& rbtree<_Ty>::operator=(rbtree&& _Other)
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::iterator rbtree<_Ty>::begin()
+inline constexpr rbtree_iterator<_Ty> rbtree<_Ty>::begin()
 {
 	iterator it(_Super_root);
 	it._Find_min();
@@ -114,7 +116,7 @@ inline constexpr rbtree<_Ty>::iterator rbtree<_Ty>::begin()
 
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::const_iterator rbtree<_Ty>::begin() const
+inline constexpr rbtree_iterator<const _Ty> rbtree<_Ty>::begin() const
 {
 	const_iterator it(_Super_root);
 	it._Find_min();
@@ -122,13 +124,13 @@ inline constexpr rbtree<_Ty>::const_iterator rbtree<_Ty>::begin() const
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::iterator rbtree<_Ty>::end()
+inline constexpr rbtree_iterator<_Ty> rbtree<_Ty>::end()
 {
 	return iterator(_Super_root);
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::const_iterator rbtree<_Ty>::end() const
+inline constexpr rbtree_iterator<const _Ty> rbtree<_Ty>::end() const
 {
 	return const_iterator(_Super_root);
 }
@@ -152,14 +154,14 @@ inline constexpr void rbtree<_Ty>::insert(_Ty&& _Val)
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::iterator rbtree<_Ty>::find(const _Ty& _Val)
+inline constexpr rbtree_iterator<_Ty> rbtree<_Ty>::find(const _Ty& _Val)
 {
 	node* _Result = _Find(_Get_root(), _Val);
 	return iterator(_Result);
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::const_iterator rbtree<_Ty>::find(const _Ty& _Val) const
+inline constexpr rbtree_iterator<const _Ty> rbtree<_Ty>::find(const _Ty& _Val) const
 {
 	node* _Result = _Find(_Get_root(), _Val);
 	return const_iterator(_Result);
@@ -201,7 +203,7 @@ inline constexpr void rbtree<_Ty>::_Insert(node* _Node)
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::node*& rbtree<_Ty>::_Get_root() const
+inline constexpr rbnode<_Ty>*& rbtree<_Ty>::_Get_root() const
 {
 	return _Super_root->left;
 }
@@ -295,7 +297,7 @@ inline constexpr void rbtree<_Ty>::_Insert_fixup(node* _Node)
 }
 
 template<class _Ty>
-inline constexpr rbtree<_Ty>::node* rbtree<_Ty>::_Find(node* _Begin, const _Ty& _Val) const
+inline constexpr rbnode<_Ty>* rbtree<_Ty>::_Find(node* _Begin, const _Ty& _Val) const
 {
 	if (!_Begin) return _Super_root;
 
@@ -516,3 +518,5 @@ private:
 
 	node* _Current_node;
 };
+
+#pragma pack(pop)
