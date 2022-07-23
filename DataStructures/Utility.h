@@ -184,3 +184,8 @@ struct remove_const<const _Ty> {
 
 template <class _Ty>
 using remove_const_t = typename remove_const<_Ty>::type;
+
+template <class _Ty>
+inline constexpr bool is_power_of_2(const _Ty& _Val) {
+	return (_Val & (_Val - 1)) == 0;
+}

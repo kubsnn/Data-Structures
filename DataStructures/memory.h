@@ -42,6 +42,13 @@ struct allocator
 		new(_Where) _Ty(forward<_Vals>(_Args)...);
 	}
 
+	// creates objects (in place) in range and forwards _Args to constructor
+	template <class ..._Vals>
+	static constexpr void construct_range(_Ty* _First, _Ty* _Last, _Vals&&... _Args) {
+		for (; _First != _Last; ++_First) {
+			new (_First) _Ty(forward<_Vals>(_Args)...);
+		}
+	}
 private:
 	static constexpr void _Move_memory_block(_Ty* _Src, _Ty* _Dst, size_t _Count) {
 		for (size_t i = 0; i < _Count; ++i) {
@@ -77,10 +84,10 @@ inline void _Copy_in_place(_Ty* _First, _Ty* _Last, _Ty* _Dest) {
 	}
 }
 
-template <class _Ty>
-inline void _Fill_in_place(_Ty* _First, _Ty* _Last, const _Ty& _Val) {
+template <class _Ty, class ...Args>
+inline void _Fill_in_place(_Ty* _First, _Ty* _Last, Args&&... _Args) {
 	for (; _First != _Last; ++_First) {
-		new(_First) _Ty(_Val);
+		new(_First) _Ty(forward<Args>(_Args)...);
 	}
 }
 
