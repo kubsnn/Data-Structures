@@ -70,10 +70,17 @@ inline constexpr void _Move_in_place(_Ty* _Src, _Ty* _Dst, size_t _Count) {
 	}
 }
 
-template <class _Ty, class _InIt, class _OutIt>
-inline void _Copy_in_place(_InIt _First, _InIt _Last, _OutIt _Dest) {
+template <class _Ty>
+inline void _Copy_in_place(_Ty* _First, _Ty* _Last, _Ty* _Dest) {
 	for (; _First != _Last; ++_First, ++_Dest) {
 		new(_Dest) _Ty(*_First);
+	}
+}
+
+template <class _Ty>
+inline void _Fill_in_place(_Ty* _First, _Ty* _Last, const _Ty& _Val) {
+	for (; _First != _Last; ++_First) {
+		new(_First) _Ty(_Val);
 	}
 }
 

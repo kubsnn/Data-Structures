@@ -32,7 +32,6 @@ public:
 	template <class ..._Values>
 	void emplace(unsigned int _Index, _Values&&... _Vals);
 
-
 	void remove_at(unsigned int _Index);
 
 	constexpr size_t size() const;
@@ -41,6 +40,8 @@ public:
 	constexpr const_iterator begin() const;
 	constexpr iterator end();
 	constexpr const_iterator end() const;
+
+	void fill(const _Ty& _Val);
 
 	void clear();
 
@@ -93,7 +94,8 @@ inline vector<_Ty, _Allocator>::vector(size_t _Size, const _Ty& _Val)
 {
 	_MaxSize = nearest_bigger_power_of_2(_Size);
 	_Data = _Allocator::allocate(_MaxSize);
-	::fill(_Data, _Data + _Size, _Val);
+	this->_Size = _Size;
+	_Fill_in_place(_Data, _Data + _Size, _Val);
 }
 
 template<class _Ty, class _Allocator>
@@ -109,7 +111,7 @@ inline vector<_Ty, _Allocator>::vector(vector&& _Vec) noexcept
 	_MaxSize = _Vec._MaxSize;
 	_Data = _Vec._Data;
 
-	_Vec._Data = NULL;
+	_Vec._Data = nullptr;
 	_Vec._Size = 0;
 	_Vec._MaxSize = 0;
 }
@@ -137,7 +139,7 @@ inline void vector<_Ty, _Allocator>::append(const vector& _Vec)
 {
 	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
 
-	copy(_Vec._Data, _Vec._Data + _Vec._Size, _Data + _Size);
+	_Copy_in_place(_Vec._Data, _Vec._Data + _Vec._Size, _Data + _Size);
 	_Size += _Vec._Size;
 }
 
@@ -146,7 +148,7 @@ inline void vector<_Ty, _Allocator>::append(vector&& _Vec)
 {
 	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
 
-	move_mem(_Vec._Data, _Data + _Size, _Vec._Size);
+	_Move_in_place(_Vec._Data, _Data + _Size, _Vec._Size);
 	_Size += _Vec._Size;
 
 	_Vec._Data = NULL;
@@ -229,6 +231,12 @@ inline constexpr const _Ty* vector<_Ty, _Allocator>::end() const
 }
 
 template<class _Ty, class _Allocator>
+inline void vector<_Ty, _Allocator>::fill(const _Ty& _Val)
+{
+	::fill(_Data, _Data + _Size, _Val);
+}
+
+template<class _Ty, class _Allocator>
 inline void vector<_Ty, _Allocator>::clear()
 {
 	_Clear();
@@ -264,7 +272,7 @@ inline vector<_Ty, _Allocator>& vector<_Ty, _Allocator>::operator=(vector&& _Vec
 	_MaxSize = _MaxSize;
 	_Data = _Vec._Data;
 
-	_Vec._Data = NULL;
+	_Vec._Data = nullptr;
 	_Vec._Size = 0;
 	_Vec._MaxSize = 0;
 	return *this;
@@ -360,7 +368,7 @@ inline void vector<_Ty, _Allocator>::_Copy_from(const vector& _Vec)
 	_Size = _Vec._Size;
 	_MaxSize = _Vec._MaxSize;
 	_Data = _Allocator::allocate(_MaxSize);
-	_Copy_in_place<_Ty>(_Vec._Data, _Vec._Data + _Vec._Size, _Data);
+	_Copy_in_place(_Vec._Data, _Vec._Data + _Vec._Size, _Data);
 }
 
 template<class _Ty, class _Allocator>
@@ -371,5 +379,5 @@ inline void vector<_Ty, _Allocator>::_Clear()
 	_Allocator::deallocate(_Data);
 	_Size = 0;
 	_MaxSize = 0;
-	_Data = NULL;
+	_Data = nullptr;
 }
