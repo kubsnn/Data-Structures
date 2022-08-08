@@ -172,6 +172,7 @@ inline forward_list<_Ty>::~forward_list()
 template<class _Ty>
 inline forward_list<_Ty>& forward_list<_Ty>::operator=(const forward_list& _Other)
 {
+	if (this == &_Other) return *this;
 	_Clear();
 	_Copy(_Other);
 	return *this;
@@ -180,6 +181,7 @@ inline forward_list<_Ty>& forward_list<_Ty>::operator=(const forward_list& _Othe
 template<class _Ty>
 inline forward_list<_Ty>& forward_list<_Ty>::operator=(forward_list&& _Other) noexcept
 {
+	if (this == &_Other) return *this;
 	_Clear();
 	_Head = _Other._Head;
 	_Size = _Other._Size;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "memory.h"
 
 template<class _Ty = void>
 struct less
@@ -88,7 +89,7 @@ constexpr void sort_heap(_Ty* const& _Data, size_t _Size, _Pr _Pred) {
 
 //sortowanie introspektywne
 template <class _Ty, class _Pr>
-constexpr void intro_sort(_Ty* const& _Data, int left, int right, int depth, _Pr _Pred) {
+inline constexpr void intro_sort(_Ty* const& _Data, int left, int right, int depth, _Pr _Pred) {
     if (left >= right) return;
 
     const size_t size = right - left + 1;
@@ -123,16 +124,6 @@ inline constexpr void sort(_Iter _First, _Iter _Last, _Pr _Pred) {
 }
 
 template <class _Ty, template<class _T = _Ty> class _Container>
-inline constexpr _Container<_Ty> range1(size_t _Count)
-{
-    _Container<_Ty> _Data;
-    for (size_t i = 0; i < _Count; ++i) {
-        _Data.append(i);
-    }
-    return _Data;
-}
-
-template <class _Ty, template<class _T = _Ty> class _Container>
 inline constexpr _Container<_Ty> range(size_t _Count, int _Step)
 {
     _Container<_Ty> _Data;
@@ -146,8 +137,37 @@ inline constexpr _Container<_Ty> range(size_t _Count, int _Step)
 template <class _Ty, template<class _T = _Ty> class _Container>
 inline constexpr _Container<_Ty> range(size_t _Count)
 {
-    return range1<_Ty, _Container>(_Count);
+    _Container<_Ty> _Data;
+    for (size_t i = 0; i < _Count; ++i) {
+        _Data.append(i);
+    }
+    return _Data;
 }
+
+#if __CPPVER < 201703L
+
+template <class _Ty, template<class _T = _Ty, class _Al = allocator<_Ty>> class _Container>
+inline constexpr _Container<_Ty, allocator<_Ty>> range(size_t _Count)
+{
+    _Container<_Ty> _Data;
+    for (size_t i = 0; i < _Count; ++i) {
+        _Data.append(i);
+    }
+    return _Data;
+}
+
+template <class _Ty, template<class _T = _Ty, class _Al = allocator<_Ty>> class _Container>
+inline constexpr _Container<_Ty, allocator<_Ty>> range(size_t _Count, int _Step)
+{
+    _Container<_Ty> _Data;
+    size_t next = static_cast<size_t>(_Step > 0 ? 0 : (int)(1 - _Count) * _Step);
+    for (size_t i = 0; i < _Count; ++i, next += _Step) {
+        _Data.append(next);
+    }
+    return _Data;
+}
+
+#endif
 
 template <class _Array>
 inline constexpr _Array range(int _Step)
@@ -163,7 +183,11 @@ inline constexpr _Array range(int _Step)
 template <class _Array>
 inline constexpr _Array range()
 {
-    return range<_Array>(1);
+    _Array _Data{};
+    for (size_t i = 0; i < _Data.size(); ++i) {
+        _Data[i] = i;
+    }
+    return _Data;
 }
 
 template <class _Iter>
@@ -173,3 +197,28 @@ inline constexpr void reverse(_Iter _First, _Iter _Last)
         iter_swap(_First++, _Last);
     }
 }
+
+#if __CPPVER >= 201703L
+
+struct sorted_t
+{
+    template <class _Ty>
+    constexpr _Ty& operator()(_Ty& _Val) const {
+        sort(_Val.begin(), _Val.end());
+        return _Val;
+    }
+};
+
+inline const sorted_t sorted = {};
+
+template <class _Ty>
+_Ty& operator|(_Ty& _Val, const sorted_t& s) {
+    return s(_Val);
+}
+
+template <class _Ty>
+_Ty operator|(_Ty&& _Val, const sorted_t& s) {
+    return s(_Val);
+}
+
+#endif

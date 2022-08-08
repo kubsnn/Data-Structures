@@ -93,6 +93,7 @@ inline constexpr rbtree<_Ty>::rbtree(rbtree&& _Other)
 template<class _Ty>
 inline constexpr rbtree<_Ty>& rbtree<_Ty>::operator=(const rbtree& _Other)
 {
+	if (this == &_Other) return *this;
 	_Free_nodes();
 	_Copy(_Other);
 	return *this;
@@ -101,6 +102,7 @@ inline constexpr rbtree<_Ty>& rbtree<_Ty>::operator=(const rbtree& _Other)
 template<class _Ty>
 inline constexpr rbtree<_Ty>& rbtree<_Ty>::operator=(rbtree&& _Other)
 {
+	if (this == &_Other) return *this;
 	_Free_nodes();
 	_Move(_Other);
 	return *this;

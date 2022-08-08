@@ -12,6 +12,13 @@ typedef int              ptrdiff_t;
 typedef int              intptr_t;
 #endif
 
+#if defined(_MSVC_LANG)
+#define __CPPVER _MSVC_LANG
+#else
+#define __CPPVER __cplusplus
+#endif
+
+
 template <class _Ty1, class _Ty2>
 struct Pair
 {
@@ -189,3 +196,11 @@ template <class _Ty>
 inline constexpr bool is_power_of_2(const _Ty& _Val) {
 	return (_Val & (_Val - 1)) == 0;
 }
+
+template <class _Ty1, class _Ty2>
+inline bool is_same = false;
+
+template <class _Ty>
+inline bool is_same<_Ty, _Ty> = true;
+
+
