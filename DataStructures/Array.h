@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Utility.h"
+#include "pointer_iterator.h"
 
 template<class _Ty, size_t _Size>
 class array
 {
 public:
-	using iterator = _Ty*;
-	using const_iterator = const _Ty*;
+	using iterator = pointer_iterator<_Ty>;
+	using const_iterator = pointer_iterator<const _Ty>;
 
 	constexpr array();
 	constexpr array(const _Ty& _Val_to_fill);
@@ -64,25 +65,25 @@ inline constexpr void array<_Ty, _Size>::fill(const _Ty& _Val)
 }
 
 template<class _Ty, size_t _Size>
-inline constexpr _Ty* array<_Ty, _Size>::begin()
+inline constexpr pointer_iterator<_Ty> array<_Ty, _Size>::begin()
 {
 	return _Data;
 }
 
 template<class _Ty, size_t _Size>
-inline constexpr const _Ty* array<_Ty, _Size>::begin() const
+inline constexpr pointer_iterator<const _Ty> array<_Ty, _Size>::begin() const
 {
 	return _Data;
 }
 
 template<class _Ty, size_t _Size>
-inline constexpr _Ty* array<_Ty, _Size>::end()
+inline constexpr pointer_iterator<_Ty> array<_Ty, _Size>::end()
 {
 	return _Data + _Size;
 }
 
 template<class _Ty, size_t _Size>
-inline constexpr const _Ty* array<_Ty, _Size>::end() const
+inline constexpr pointer_iterator<const _Ty> array<_Ty, _Size>::end() const
 {
 	return _Data + _Size;
 }

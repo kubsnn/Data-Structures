@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Utility.h"
+#include "pointer_iterator.h"
+
 
 template <class _Ty>
 class dynarray
 {
 public:
-	using iterator = _Ty*;
-	using const_iterator = const _Ty*;
+	using iterator = pointer_iterator<_Ty>;
+	using const_iterator = pointer_iterator<const _Ty>;
+
+	using category = random_access_iterator;
 
 	constexpr dynarray();
 	constexpr dynarray(size_t _Array_size);
@@ -108,25 +112,25 @@ inline constexpr size_t dynarray<_Ty>::size() const
 }
 
 template<class _Ty>
-inline constexpr _Ty* dynarray<_Ty>::begin()
+inline constexpr pointer_iterator<_Ty> dynarray<_Ty>::begin()
 {
 	return _Data;
 }
 
 template<class _Ty>
-inline constexpr const _Ty* dynarray<_Ty>::begin() const
+inline constexpr pointer_iterator<const _Ty> dynarray<_Ty>::begin() const
 {
 	return _Data;
 }
 
 template<class _Ty>
-inline constexpr _Ty* dynarray<_Ty>::end()
+inline constexpr pointer_iterator<_Ty> dynarray<_Ty>::end()
 {
 	return _Data + _Size;
 }
 
 template<class _Ty>
-inline constexpr const _Ty* dynarray<_Ty>::end() const
+inline constexpr pointer_iterator<const _Ty> dynarray<_Ty>::end() const
 {
 	return _Data + _Size;
 }

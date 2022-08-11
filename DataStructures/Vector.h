@@ -2,13 +2,17 @@
 
 #include "Utility.h"
 #include "memory.h"
+#include "pointer_iterator.h"
 
 template<class _Ty, class _Allocator = allocator<_Ty>>
 class vector
 {
 public:
-	using iterator = _Ty*;
-	using const_iterator = const _Ty*;
+	using iterator = pointer_iterator<_Ty>;
+	using const_iterator = pointer_iterator<const _Ty>;
+
+	friend struct iterator;
+	friend struct const_iterator;
 
 	constexpr vector();
 	constexpr vector(size_t _Size);
@@ -50,8 +54,8 @@ public:
 	constexpr _Ty& operator[](unsigned int _Index);
 	constexpr const _Ty& operator[](unsigned int _Index) const;
 
-	constexpr vector& operator=(const vector& _Vec);
-	constexpr vector& operator=(vector&& _Vec) noexcept;
+	constexpr vector& operator=(const vector& _Other);
+	constexpr vector& operator=(vector&& _Other) noexcept;
 
 	constexpr bool operator==(const vector& _Vec) const;
 	constexpr bool operator!=(const vector& _Vec) const;
@@ -139,7 +143,7 @@ inline constexpr void vector<_Ty, _Allocator>::append(_Ty&& _Val)
 template<class _Ty, class _Allocator>
 inline constexpr void vector<_Ty, _Allocator>::append(const vector& _Vec)
 {
-	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
+	_Try_resize(_Size + _Vec._Size);
 
 	_Copy_in_place(_Vec._Data, _Vec._Data + _Vec._Size, _Data + _Size);
 	_Size += _Vec._Size;
@@ -148,7 +152,7 @@ inline constexpr void vector<_Ty, _Allocator>::append(const vector& _Vec)
 template<class _Ty, class _Allocator>
 inline constexpr void vector<_Ty, _Allocator>::append(vector&& _Vec)
 {
-	_Try_resize(nearest_bigger_power_of_2(_Size + _Vec._Size));
+	_Try_resize(_Size + _Vec._Size);
 
 	_Move_in_place(_Vec._Data, _Data + _Size, _Vec._Size);
 	_Size += _Vec._Size;
@@ -214,27 +218,27 @@ inline constexpr size_t vector<_Ty, _Allocator>::_max_size() const
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr _Ty* vector<_Ty, _Allocator>::begin()
+inline constexpr pointer_iterator<_Ty> vector<_Ty, _Allocator>::begin()
 {
-	return _Data;
+	return iterator(_Data);
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr const _Ty* vector<_Ty, _Allocator>::begin() const
+inline constexpr pointer_iterator<const _Ty> vector<_Ty, _Allocator>::begin() const
 {
-	return _Data;
+	return const_iterator(_Data);
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr _Ty* vector<_Ty, _Allocator>::end()
+inline constexpr pointer_iterator<_Ty> vector<_Ty, _Allocator>::end()
 {
-	return _Data + _Size;
+	return iterator(_Data + _Size);
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr const _Ty* vector<_Ty, _Allocator>::end() const
+inline constexpr pointer_iterator<const _Ty> vector<_Ty, _Allocator>::end() const
 {
-	return _Data + _Size;
+	return const_iterator(_Data + _Size);
 }
 
 template<class _Ty, class _Allocator>
@@ -288,24 +292,26 @@ inline constexpr const _Ty& vector<_Ty, _Allocator>::operator[](unsigned int _In
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr vector<_Ty, _Allocator>& vector<_Ty, _Allocator>::operator=(const vector& _Vec)
+inline constexpr vector<_Ty, _Allocator>& vector<_Ty, _Allocator>::operator=(const vector& _Other)
 {
+	if (this == &_Other) return *this;
 	_Clear();
-	_Copy_from(_Vec);
+	_Copy_from(_Other);
 	return *this;
 }
 
 template<class _Ty, class _Allocator>
-inline constexpr vector<_Ty, _Allocator>& vector<_Ty, _Allocator>::operator=(vector&& _Vec) noexcept
+inline constexpr vector<_Ty, _Allocator>& vector<_Ty, _Allocator>::operator=(vector&& _Other) noexcept
 {
+	if (this == &_Other) return *this;
 	_Clear();
 	_Size = _Size;
 	_MaxSize = _MaxSize;
-	_Data = _Vec._Data;
+	_Data = _Other._Data;
 
-	_Vec._Data = nullptr;
-	_Vec._Size = 0;
-	_Vec._MaxSize = 0;
+	_Other._Data = nullptr;
+	_Other._Size = 0;
+	_Other._MaxSize = 0;
 	return *this;
 }
 
@@ -354,7 +360,7 @@ template<class ..._Values>
 inline constexpr void vector<_Ty, _Allocator>::_Emplace_back(_Values&& ..._Vals)
 {
 	++_Size;
-	_Try_resize(_Get_new_size());
+	_Try_resize(_Size);
 
 	_Allocator::construct(&_Data[_Size - 1], forward<_Values>(_Vals)...);
 }
@@ -364,7 +370,7 @@ template<class ..._Values>
 inline constexpr void vector<_Ty, _Allocator>::_Emplace(size_t _Where, _Values&& ..._Vals)
 {
 	++_Size;
-	_Try_resize(_Get_new_size());
+	_Try_resize(_Size);
 	_Move_in_place(_Data + _Where, _Data + _Where + 1, _Size - _Where - 1);
 	_Allocator::construct(&_Data[_Where], forward<_Values>(_Vals)...);
 }
@@ -372,9 +378,10 @@ inline constexpr void vector<_Ty, _Allocator>::_Emplace(size_t _Where, _Values&&
 template<class _Ty, class _Allocator>
 inline constexpr void vector<_Ty, _Allocator>::_Try_resize(size_t _NewSize)
 {
-	if (_NewSize == _MaxSize) return;
+	if (_NewSize <= _MaxSize) return;
 
-	_Allocator::reallocate(_Data, _Size, _NewSize);
+	size_t _Calculated_size = nearest_bigger_power_of_2(_NewSize);
+	_Allocator::reallocate(_Data, _Size, _Calculated_size);
 
 	_MaxSize = _NewSize;
 }
@@ -405,3 +412,4 @@ inline constexpr void vector<_Ty, _Allocator>::_Clear()
 	_MaxSize = 0;
 	_Data = nullptr;
 }
+
