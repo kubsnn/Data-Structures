@@ -64,7 +64,7 @@ constexpr void heapify(_Ty* const& _Data, int i, size_t n, _Pr _Pred) {
     int left = 2 * i + 1;
     int right = 2 * i + 2;
     if (left < n && _Pred(_Data[left], _Data[root])) root = left;
-    if (right < n && _Pred(_Data[right], _Data[root])) root = right;
+    if (right < n&& _Pred(_Data[right], _Data[root])) root = right;
 
     if (root != i) {
         swap(_Data[i], _Data[root]);
@@ -111,16 +111,20 @@ inline constexpr void intro_sort(_Ty* const& _Data, int left, int right, int dep
 
 template <class _Iter>
 inline constexpr void sort(_Iter _First, _Iter _Last) {
-    const size_t size = _Last - _First;
-    int max_depth = 2 * static_cast<int>(log2(size));
-    intro_sort(_First, 0, size - 1, max_depth, greater<>{});
+    sort(_First, _Last, greater<>{});
 }
 
 template <class _Iter, class _Pr>
 inline constexpr void sort(_Iter _First, _Iter _Last, _Pr _Pred) {
-    const size_t size = _Last - _First;
+
+    static_assert(is_random_access<_Iter>, "Memory data must be contiguous! (random access)");
+
+    auto _UFirst = unwrap(_First);
+    auto _ULast = unwrap(_Last);
+    
+    const size_t size = _ULast - _UFirst;
     int max_depth = 2 * static_cast<int>(log2(size));
-    intro_sort(_First, 0, size - 1, max_depth, _Pred);
+    intro_sort(_UFirst, 0, size - 1, max_depth, _Pred);
 }
 
 template <class _Ty, template<class _T = _Ty> class _Container>
@@ -200,7 +204,7 @@ inline constexpr void reverse(_Iter _First, _Iter _Last)
 
 #if __CPPVER >= 201703L
 
-struct sorted_t
+struct sorted_fn
 {
     template <class _Ty>
     constexpr _Ty& operator()(_Ty& _Val) const {
@@ -209,15 +213,15 @@ struct sorted_t
     }
 };
 
-inline const sorted_t sorted = {};
+constexpr const sorted_fn sorted = {};
 
 template <class _Ty>
-_Ty& operator|(_Ty& _Val, const sorted_t& s) {
+_Ty& operator|(_Ty& _Val, const sorted_fn& s) {
     return s(_Val);
 }
 
 template <class _Ty>
-_Ty operator|(_Ty&& _Val, const sorted_t& s) {
+_Ty operator|(_Ty&& _Val, const sorted_fn& s) {
     return s(_Val);
 }
 

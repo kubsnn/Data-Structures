@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\containers">
+      <UniqueIdentifier>{141a8904-bf64-4072-9246-5aeb9c0ddf04}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -23,43 +26,52 @@
     <ClInclude Include="Hash.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedList.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="Utility.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="hashtable.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="compressed_pair.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="vector.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="array.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithms.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="Set.h">
+    <ClInclude Include="memory.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="cycle.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Set.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
     </ClInclude>
     <ClInclude Include="rbtree.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="forward_list.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\containers</Filter>
     </ClInclude>
     <ClInclude Include="map.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="hashtable.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="forward_list.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
     </ClInclude>
     <ClInclude Include="dynarray.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="array.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="enumerate.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="memory.h">
+    <ClInclude Include="pointer_iterator.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
