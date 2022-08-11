@@ -586,7 +586,7 @@ struct linkedlist_iterator
 	friend class linkedlist<remove_const_t<_Ty>>;
 public:
 	using node = linkedlist_node<remove_const_t<_Ty>>;
-
+	using category = complex_iterator;
 	linkedlist_iterator();
 	linkedlist_iterator(node* const& _Ptr);
 	linkedlist_iterator(node*&& _Ptr);

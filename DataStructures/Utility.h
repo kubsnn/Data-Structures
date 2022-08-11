@@ -2,6 +2,7 @@
 
 #include "Hash.h"
 
+
 #ifdef _WIN64
 typedef unsigned __int64 size_t;
 typedef __int64          ptrdiff_t;
@@ -18,28 +19,93 @@ typedef int              intptr_t;
 #define __CPPVER __cplusplus
 #endif
 
+//
+//   iterator categories
 
-template <class _Ty1, class _Ty2>
-struct Pair
-{
-	_Ty1 first;
-	_Ty2 second;
+/*
+	iterator must have:
+		- operator++ / operator--
+		- operator*
+		- operator==
+	should have:
+		- operator->
 
-	Pair(_Ty1 _First, _Ty2 _Second) {
-		first = _First;
-		second = _Second;
-	}
+	random access iterator requirements:
+		- contiguous memory
+		- unwrap() method which returns pointer to memory
+		- operator<, >, <=, >=
+*/
+struct random_access_iterator {};
+struct complex_iterator {};
+
+// !-->
+
+template <class _Ty>
+struct remove_const {
+	using type = _Ty;
 };
 
-template <class _Ty1, class _Ty2>
-struct Hash<Pair<_Ty1, _Ty2>>
-{
-	size_t operator()(const Pair<_Ty1, _Ty2>& _Pair) {
-		size_t hash1 = Hash<_Ty1>()(_Pair.first);
-		size_t hash2 = Hash<_Ty2>()(_Pair.second);
-		return hash1 + hash2;
-	}
+template <class _Ty>
+struct remove_const<const _Ty> {
+	using type = _Ty;
 };
+
+template <class _Ty>
+using remove_const_t = typename remove_const<_Ty>::type;
+
+template <class _Ty>
+struct remove_volatile {
+	using type = _Ty;
+};
+
+template <class _Ty>
+struct remove_volatile<volatile _Ty> {
+	using type = _Ty;
+};
+
+template <class _Ty>
+using remove_volatile_t = typename remove_volatile<_Ty>::type;
+
+template <class>
+constexpr bool is_pointer_v = false; 
+
+template <class _Ty>
+constexpr bool is_pointer_v<_Ty*> = true;
+
+template <class _Ty>
+constexpr bool is_pointer_v<_Ty* const> = true;
+
+template <class _Ty>
+constexpr bool is_pointer_v<_Ty* volatile> = true;
+
+template <class _Ty>
+constexpr bool is_pointer_v<_Ty* const volatile> = true;
+
+template <class, class>
+constexpr bool is_same = false;
+
+template <class _Ty>
+constexpr bool is_same<_Ty, _Ty> = true;
+
+template <class _Ty, class _Type = void>
+struct enable_if {
+	using type = _Type;
+};
+
+template <class _Ty, class Enable = void>
+constexpr bool is_random_access = false;
+
+template <class _Ty>
+constexpr bool is_random_access<_Ty*> = true;
+
+template <class _Ty>
+constexpr bool is_random_access<_Ty* const> = true;
+
+template <class _Ty>
+constexpr bool is_random_access<_Ty* volatile> = true;
+
+template <class _Ty>
+constexpr bool is_random_access<_Ty, typename enable_if<typename _Ty::category>::type> = is_same<typename _Ty::category, random_access_iterator>;
 
 template <class _Ty>
 inline constexpr const _Ty& max(const _Ty& _Left, const _Ty& _Right) {
@@ -169,28 +235,30 @@ inline constexpr bool arrays_compare(const InputIt1 _First1, const InputIt1 _Las
 	return true;
 }
 
+template <class Iter>
+inline constexpr decltype(auto) unwrap(Iter&& _It) {
+	if constexpr (is_pointer_v<remove_reference_t<Iter>>)
+		return _It;
+	else
+		return static_cast<Iter&&>(_It).unwrap();
+}
+
 template <class FwdIt>
-inline constexpr size_t distance(const FwdIt _First, const FwdIt _Last) {
+inline constexpr size_t _Distance_helper(const FwdIt _First, const FwdIt _Last) {
 	size_t _Dist = 0;
 	auto _UFirst = const_cast<FwdIt&>(_First);
-	for (; _UFirst != _Last; ++_UFirst) {
-		++_Dist;
-	}
+	for (; _UFirst != _Last; ++_UFirst, ++_Dist) { }
 	return _Dist;
 }
 
-template <class _Ty>
-struct remove_const {
-	using type = _Ty;
-};
+template <class FwdIt>
+inline constexpr size_t distance(const FwdIt _First, const FwdIt _Last) {
 
-template <class _Ty>
-struct remove_const<const _Ty> {
-	using type = _Ty;
-};
-
-template <class _Ty>
-using remove_const_t = typename remove_const<_Ty>::type;
+	if constexpr (is_random_access<FwdIt>)
+		return static_cast<size_t>(unwrap(_Last) - unwrap(_First));
+	else
+		return _Distance_helper(_First, _Last);
+}
 
 template <class _Ty>
 inline constexpr bool is_power_of_2(const _Ty& _Val) {
@@ -198,9 +266,100 @@ inline constexpr bool is_power_of_2(const _Ty& _Val) {
 }
 
 template <class _Ty1, class _Ty2>
-inline bool is_same = false;
+class pair
+{
+public:
+	constexpr pair()
+		: first()
+		, second()
+	{ }
+	constexpr pair(const pair& _Other)
+		: first(_Other.first)
+		, second(_Other.second)
+	{ }
+	constexpr pair(pair&& _Other) noexcept
+		: first(move(_Other.first))
+		, second(move(_Other.second))
+	{ }
+	constexpr pair(const _Ty1& _X, const _Ty2& _Y)
+		: first(_X)
+		, second(_Y)
+	{ }
+	constexpr pair(const _Ty1& _X, _Ty2&& _Y)
+		: first(_X)
+		, second(move(_Y))
+	{ }
+	constexpr pair(_Ty1&& _X, const _Ty2& _Y)
+		: first(move(_X))
+		, second(_Y)
+	{ }
+	constexpr pair(_Ty1&& _X, _Ty2&& _Y)
+		: first(move(_X))
+		, second(move(_Y))
+	{ }
+
+	constexpr pair& operator=(const pair& _Other) {
+		first = _Other.first;
+		second = _Other.second;
+		return *this;
+	}
+	constexpr pair& operator=(pair&& _Other) noexcept {
+		first = move(_Other.first);
+		second = move(_Other.second);
+		return *this;
+	}
+	constexpr bool operator==(const pair& _Other) const {
+		return first == _Other.first && second == _Other.second;
+	}
+
+	_Ty1 first;
+	_Ty2 second;
+};
+
+template <class>
+constexpr bool is_numeric = false;
+
+template<>
+constexpr bool is_numeric<bool> = true;
+
+template<>
+constexpr bool is_numeric<char> = true;
+
+template<>
+constexpr bool is_numeric<signed char> = true;
+
+template<>
+constexpr bool is_numeric<unsigned char> = true;
+
+template<>
+constexpr bool is_numeric<short> = true;
+
+template<>
+constexpr bool is_numeric<unsigned short> = true;
+
+template<>
+constexpr bool is_numeric<int> = true;
+
+template<>
+constexpr bool is_numeric<unsigned int> = true;
+
+template<>
+constexpr bool is_numeric<long> = true;
+
+template<>
+constexpr bool is_numeric<unsigned long> = true;
+
+template<>
+constexpr bool is_numeric<long long> = true;
+
+template<>
+constexpr bool is_numeric<unsigned long long> = true;
 
 template <class _Ty>
-inline bool is_same<_Ty, _Ty> = true;
+constexpr bool is_rvalue = false;
 
+template <class _Ty>
+constexpr bool is_rvalue<_Ty&> = false;
 
+template <class _Ty>
+constexpr bool is_rvalue<_Ty&&> = true;

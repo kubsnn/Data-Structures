@@ -393,6 +393,8 @@ template <class _Ty>
 struct hashtable_iterator
 {
 public:
+	using category = complex_iterator;
+
 	using bucket_type = forward_list<remove_const_t<_Ty>>*;
 	using first_type = typename _Ty::first_type;
 	using second_type = typename _Ty::second_type;

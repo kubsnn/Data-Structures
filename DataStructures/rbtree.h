@@ -465,6 +465,8 @@ template <class _Ty>
 struct rbtree_iterator
 {
 public:
+	using category = complex_iterator;
+
 	using node = rbnode<remove_const_t<_Ty>>;
 	using rbtree = rbtree<remove_const_t<_Ty>>;
 	using iterator = rbtree_iterator<_Ty>;

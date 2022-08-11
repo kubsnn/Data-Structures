@@ -104,6 +104,8 @@ template <class _Ty>
 struct forward_list_iterator
 {
 public:
+	using category = complex_iterator;
+
 	using node = forward_list_node<remove_const_t<_Ty>>;
 	using iterator = forward_list_iterator<_Ty>;
 	friend class forward_list<remove_const_t<_Ty>>;
