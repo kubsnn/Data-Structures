@@ -3,22 +3,22 @@
 #include "Utility.h"
 
 template <class _Container>
-struct enumerate_iterator;
+struct _Enumerate_iterator;
 
 template <class _Ty>
 struct enumerate_pair;
 
 template <class _Container, bool lvalue_reference = true>
-class enumerate_t
+class _Enumerate
 {
 public:
-	using iterator = enumerate_iterator<typename _Container::iterator>;
-	using const_iterator = enumerate_iterator<typename _Container::const_iterator>;
+	using iterator = _Enumerate_iterator<typename _Container::iterator>;
+	using const_iterator = _Enumerate_iterator<typename _Container::const_iterator>;
 
 	friend struct iterator;
 	friend struct const_iterator;
 
-	constexpr enumerate_t(_Container& _Data_ref)
+	constexpr _Enumerate(_Container& _Data_ref)
 		: _Data(_Data_ref)
 	{ }
 	
@@ -39,16 +39,16 @@ private:
 };
 
 template <class _Container>
-class enumerate_t<_Container, false>
+class _Enumerate<_Container, false>
 {
 public:
-	using iterator = enumerate_iterator<typename _Container::iterator>;
-	using const_iterator = enumerate_iterator<typename _Container::const_iterator>;
+	using iterator = _Enumerate_iterator<typename _Container::iterator>;
+	using const_iterator = _Enumerate_iterator<typename _Container::const_iterator>;
 
 	friend struct iterator;
 	friend struct const_iterator;
 
-	constexpr enumerate_t(_Container&& _Data_ref)
+	constexpr _Enumerate(_Container&& _Data_ref)
 		: _Data(move(_Data_ref))
 	{ }
 
@@ -69,39 +69,39 @@ private:
 };
 
 template <class _It>
-struct enumerate_iterator
+struct _Enumerate_iterator
 {
 	using container_iterator = _It;
 
-	using category = complex_iterator;
+	using category = forward_iterator;
 
-	constexpr enumerate_iterator(container_iterator&& It) 
+	constexpr _Enumerate_iterator(container_iterator&& It) 
 		: _Iter(move(It))
 	{ }
 	constexpr decltype(auto) operator*() {
 		return enumerate_pair<decltype(*_Iter)>(_Counter, *_Iter);
 	}
-	constexpr enumerate_iterator& operator++() {
+	constexpr _Enumerate_iterator& operator++() {
 		++_Iter;
 		++_Counter;
 		return *this;
 	}
-	constexpr enumerate_iterator& operator++(int) {
+	constexpr _Enumerate_iterator& operator++(int) {
 		auto _Tmp = *this;
 		++_Iter;
 		++_Counter;
 		return *_Tmp;
 	}
-	constexpr bool operator==(const enumerate_iterator& _Other) const {
+	constexpr bool operator==(const _Enumerate_iterator& _Other) const {
 		return _Iter == _Other._Iter;
 	}
-	constexpr bool operator!=(const enumerate_iterator& _Other) const {
+	constexpr bool operator!=(const _Enumerate_iterator& _Other) const {
 		return _Iter != _Other._Iter;
 	}
-	constexpr bool operator>(const enumerate_iterator& _Other) const {
+	constexpr bool operator>(const _Enumerate_iterator& _Other) const {
 		return _Iter > _Other._Iter;
 	}
-	constexpr bool operator<(const enumerate_iterator& _Other) const {
+	constexpr bool operator<(const _Enumerate_iterator& _Other) const {
 		return _Iter < _Other._Iter;
 	}
 
@@ -122,22 +122,22 @@ struct enumerate_pair
 struct enumerate_fn
 {
 	template <class _Container>
-	constexpr enumerate_t<_Container> operator()(_Container& _C) const {
-		return enumerate_t<_Container, true>(_C);
+	constexpr _Enumerate<_Container> operator()(_Container& _C) const {
+		return _Enumerate<_Container, true>(_C);
 	}
 	template <class _Container>
-	constexpr enumerate_t<_Container, false> operator()(_Container&& _C) const {
-		return enumerate_t<_Container, false>(move(_C));
+	constexpr _Enumerate<_Container, false> operator()(_Container&& _C) const {
+		return _Enumerate<_Container, false>(move(_C));
 	}
 };
 
 constexpr const enumerate_fn enumerate{};
 
 template <class _Container>
-constexpr enumerate_t<_Container, true> operator|(_Container& _C, const enumerate_fn& _Enumerate) {
+constexpr _Enumerate<_Container, true> operator|(_Container& _C, const enumerate_fn& _Enumerate) {
 	return _Enumerate(_C);
 }
 template <class _Container>
-constexpr enumerate_t<_Container, false> operator|(_Container&& _C, const enumerate_fn& _Enumerate) {
+constexpr _Enumerate<_Container, false> operator|(_Container&& _C, const enumerate_fn& _Enumerate) {
 	return _Enumerate(move(_C));
 }
