@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,7 +158,9 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="pointer_iterator.h" />
     <ClInclude Include="rbtree.h" />
+    <ClInclude Include="remove_if.h" />
     <ClInclude Include="Set.h" />
+    <ClInclude Include="take.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>

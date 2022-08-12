@@ -19,6 +19,8 @@ typedef int              intptr_t;
 #define __CPPVER __cplusplus
 #endif
 
+struct _Empty {};
+
 //
 //   iterator categories
 
@@ -36,7 +38,8 @@ typedef int              intptr_t;
 		- operator<, >, <=, >=
 */
 struct random_access_iterator {};
-struct complex_iterator {};
+struct forward_iterator {};
+struct bidirectional_iterator {};
 
 // !-->
 
@@ -92,22 +95,53 @@ struct enable_if {
 	using type = _Type;
 };
 
+template <class _Ty, class _Tag, class Enable = void>
+constexpr bool has_tag = false;
+
+template <class _Ty, class _Tag>
+constexpr bool has_tag<_Ty*, _Tag> = true;
+
+template <class _Ty, class _Tag>
+constexpr bool has_tag<_Ty* const, _Tag> = true;
+
+template <class _Ty, class _Tag>
+constexpr bool has_tag<_Ty* volatile, _Tag> = true;
+
+template <class _Ty, class _Tag>
+constexpr bool has_tag<_Ty, _Tag, typename enable_if<typename _Ty::category>::type> = is_same<typename _Ty::category, _Tag>;
+
+template <class _Ty>
+constexpr bool is_random_access = has_tag<_Ty, random_access_iterator>;
+
 template <class _Ty, class Enable = void>
-constexpr bool is_random_access = false;
+struct tag_of {
+	using tag = void;
+};
 
 template <class _Ty>
-constexpr bool is_random_access<_Ty*> = true;
+struct tag_of<_Ty*> {
+	using tag = random_access_iterator;
+};
 
 template <class _Ty>
-constexpr bool is_random_access<_Ty* const> = true;
+struct tag_of<_Ty* const> {
+	using tag = random_access_iterator;
+};
 
 template <class _Ty>
-constexpr bool is_random_access<_Ty* volatile> = true;
+struct tag_of<_Ty* volatile> {
+	using tag = random_access_iterator;
+};
 
 template <class _Ty>
-constexpr bool is_random_access<_Ty, typename enable_if<typename _Ty::category>::type> = is_same<typename _Ty::category, random_access_iterator>;
+struct tag_of<_Ty, typename enable_if<typename _Ty::category>::type> {
+	using tag = typename _Ty::category;
+};
 
 template <class _Ty>
+using tag_of_t = typename tag_of<_Ty>::tag;
+
+template <class _Ty, class _Tag>
 inline constexpr const _Ty& max(const _Ty& _Left, const _Ty& _Right) {
 	return _Left < _Right ? _Right : _Left;
 }
@@ -260,6 +294,36 @@ inline constexpr size_t distance(const FwdIt _First, const FwdIt _Last) {
 		return _Distance_helper(_First, _Last);
 }
 
+template <class Iter, class Distance>
+constexpr void _Do_advance(Iter& _It, Distance _Count, forward_iterator) {
+	while (_Count > 0) {
+		++_It;
+		--_Count;
+	}
+}
+
+template <class Iter, class Distance>
+constexpr void _Do_advance(Iter& _It, Distance _Count, bidirectional_iterator) {
+	while (_Count > 0) {
+		++_It;
+		--_Count;
+	}
+	while (_Count < 0) {
+		--_It;
+		++_Count;
+	}
+}
+
+template <class Iter, class Distance>
+constexpr void _Do_advance(Iter& _It, Distance _Count, random_access_iterator) {
+	_It += _Count;
+}
+
+template <class Iter, class Distance>
+constexpr void advance(Iter& _It, Distance _Count) {
+	_Do_advance(_It, _Count, tag_of_t<Iter>());
+}
+
 template <class _Ty>
 inline constexpr bool is_power_of_2(const _Ty& _Val) {
 	return (_Val & (_Val - 1)) == 0;
@@ -316,6 +380,28 @@ public:
 	_Ty2 second;
 };
 
+template <class _Container, bool lvalue_reference = true>
+class _Container_wrapper
+{
+public:
+	constexpr _Container_wrapper(_Container& _Ref)
+		: _Data(_Ref)
+	{ }
+protected:
+	_Container& _Data;
+};
+
+template <class _Container>
+class _Container_wrapper<_Container, false>
+{
+public:
+	constexpr _Container_wrapper(_Container&& _Ref)
+		: _Data(move(_Ref))
+	{ }
+protected:
+	_Container _Data;
+};
+
 template <class>
 constexpr bool is_numeric = false;
 
@@ -363,3 +449,11 @@ constexpr bool is_rvalue<_Ty&> = false;
 
 template <class _Ty>
 constexpr bool is_rvalue<_Ty&&> = true;
+
+template <class It, class Pred>
+constexpr It find_if(It _First, It _Last, Pred _Pr) {
+	for (; _First != _Last; ++_First) {
+		if (_Pr(*_First)) return _First;
+	}
+	return _Last;
+}
