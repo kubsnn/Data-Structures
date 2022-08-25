@@ -441,14 +441,11 @@ constexpr bool is_numeric<long long> = true;
 template<>
 constexpr bool is_numeric<unsigned long long> = true;
 
-template <class _Ty>
-constexpr bool is_rvalue = false;
+template <class>
+constexpr bool is_lvalue_reference = false;
 
 template <class _Ty>
-constexpr bool is_rvalue<_Ty&> = false;
-
-template <class _Ty>
-constexpr bool is_rvalue<_Ty&&> = true;
+constexpr bool is_lvalue_reference<_Ty&> = true;
 
 template <class _Ty>
 constexpr bool is_const = false;

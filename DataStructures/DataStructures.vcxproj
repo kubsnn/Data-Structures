@@ -146,9 +146,9 @@
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
     <ClInclude Include="array.h" />
-    <ClInclude Include="cycle.h" />
+    <ClInclude Include="cycle.hpp" />
     <ClInclude Include="dynarray.h" />
-    <ClInclude Include="enumerate.h" />
+    <ClInclude Include="enumerate.hpp" />
     <ClInclude Include="forward_list.h" />
     <ClInclude Include="Hash.h" />
     <ClInclude Include="compressed_pair.h" />
@@ -158,12 +158,13 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="pointer_iterator.h" />
     <ClInclude Include="rbtree.h" />
-    <ClInclude Include="remove_if.h" />
+    <ClInclude Include="remove_if.hpp" />
     <ClInclude Include="Set.h" />
-    <ClInclude Include="take.h" />
-    <ClInclude Include="transform.h" />
-    <ClInclude Include="Utility.h" />
+    <ClInclude Include="take.hpp" />
+    <ClInclude Include="transform.hpp" />
+    <ClInclude Include="utility.h" />
     <ClInclude Include="vector.h" />
+    <ClInclude Include="zip.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

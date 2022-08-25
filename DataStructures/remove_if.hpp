@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 
 namespace pipeline
 {
-	template <class _Iter, class _Fun>
+	template <class _Iter, class _Fun, class _EndIter>
 	struct _Remove_if_iterator;
 
 	template <class _Container, class _Fun, bool lvalue_reference>
@@ -14,8 +14,8 @@ namespace pipeline
 		using container_iterator = typename _Container::iterator;
 		using container_const_iterator = typename _Container::const_iterator;
 
-		using iterator = _Remove_if_iterator<container_iterator, _Fun>;
-		using const_iterator = _Remove_if_iterator<container_const_iterator, _Fun>;
+		using iterator = _Remove_if_iterator<container_iterator, _Fun, container_iterator>;
+		using const_iterator = _Remove_if_iterator<container_const_iterator, _Fun, container_iterator>;
 
 		using base = _Container_wrapper<_Container, lvalue_reference>;
 		using base::_Data;
@@ -44,13 +44,13 @@ namespace pipeline
 		_Fun _Fn;
 	};
 
-	template <class _Iter, class _Fun>
+	template <class _Iter, class _Fun, class _EndIter>
 	struct _Remove_if_iterator
 	{
 	public:
 		using category = forward_iterator;
 
-		constexpr _Remove_if_iterator(_Iter _Iterator, _Fun _Function, _Iter _End) 
+		constexpr _Remove_if_iterator(_Iter _Iterator, _Fun _Function, _EndIter _End)
 			: _It(_Iterator)
 			, _Fn(_Function)
 			, _End(_End)
@@ -69,12 +69,15 @@ namespace pipeline
 			++*this;
 			return *this;
 		}
-		constexpr friend bool operator==(const _Remove_if_iterator& _Left, const _Remove_if_iterator& _Right) {
+		template <class _OtherIt1, class _OtherIt2>
+		constexpr friend bool operator==(
+			const _Remove_if_iterator& _Left, 
+			const _Remove_if_iterator<_OtherIt1, _Fun, _OtherIt2>& _Right) {
 			return _Left._It == _Right._It;
 		}
-	private:
+
 		_Iter _It;
-		_Iter _End;
+		_EndIter _End;
 		_Fun _Fn;
 	};
 

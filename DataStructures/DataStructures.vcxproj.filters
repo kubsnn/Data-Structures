@@ -29,7 +29,7 @@
     <ClInclude Include="Hash.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="Utility.h">
+    <ClInclude Include="utility.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="compressed_pair.h">
@@ -71,19 +71,22 @@
     <ClInclude Include="pointer_iterator.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="remove_if.h">
+    <ClInclude Include="remove_if.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="take.h">
+    <ClInclude Include="take.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="transform.h">
+    <ClInclude Include="transform.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="enumerate.h">
+    <ClInclude Include="enumerate.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="cycle.h">
+    <ClInclude Include="cycle.hpp">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="zip.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
   </ItemGroup>

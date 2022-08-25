@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 
 namespace pipeline
 {
@@ -71,7 +71,7 @@ namespace pipeline
 		constexpr friend bool operator==(const _Take_iterator& _Left, const _Take_iterator& _Right) {
 			return _Left._It == _Right._It;
 		}
-	private:
+
 		_Iter _It;
 		size_t _Left;
 	};

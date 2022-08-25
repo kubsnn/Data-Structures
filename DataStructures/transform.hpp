@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 
 namespace pipeline
 {
@@ -48,8 +48,9 @@ namespace pipeline
 	struct _Transform_iterator
 	{
 		using category = forward_iterator;
-		constexpr _Transform_iterator(_Iter _Iterator, _Fun _Function)
-			: _It(_Iterator)
+
+		constexpr _Transform_iterator(_Iter&& _Iterator, _Fun _Function)
+			: _It(static_cast<_Iter&&>(_Iterator))
 			, _Fn(_Function)
 		{ }
 		constexpr decltype(auto) operator*() {
@@ -64,10 +65,11 @@ namespace pipeline
 			++_It;
 			return _Tmp;
 		}
-		constexpr friend bool operator==(const _Transform_iterator& _Left, const _Transform_iterator& _Right) {
+		template <class _OtherIt>
+		constexpr friend bool operator==(const _Transform_iterator& _Left, const _Transform_iterator<_OtherIt, _Fun>& _Right) {
 			return _Left._It == _Right._It;
 		}
-	private:
+
 		_Iter _It;
 		_Fun _Fn;
 	};

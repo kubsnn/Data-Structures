@@ -4,11 +4,12 @@
 
 #if __CPPVER >= 201703L
 
-#include "cycle.h"
-#include "enumerate.h"
-#include "remove_if.h"
-#include "take.h"
-#include "transform.h"
+#include "cycle.hpp"
+#include "enumerate.hpp"
+#include "remove_if.hpp"
+#include "take.hpp"
+#include "transform.hpp"
+#include "zip.hpp"
 
 namespace pipeline
 {
@@ -16,7 +17,7 @@ namespace pipeline
     constexpr auto operator|(_Container& _C, _Fun _Fn) {
         return _Fn(_C);
     }
-    template <class _Container, class _Fun, class _Arg>
+    template <class _Container, class _Fun>
     constexpr auto operator|(_Container&& _C, _Fun _Fn) {
         return _Fn(move(_C));
     }
