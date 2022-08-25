@@ -16,6 +16,9 @@
     <Filter Include="Pliki nagłówkowe\containers">
       <UniqueIdentifier>{141a8904-bf64-4072-9246-5aeb9c0ddf04}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\algorithms">
+      <UniqueIdentifier>{50f6aa3a-7fe7-428f-a29f-ed804a2bbc52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,9 +39,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="memory.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="cycle.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="vector.h">
@@ -68,17 +68,23 @@
     <ClInclude Include="array.h">
       <Filter>Pliki nagłówkowe\containers</Filter>
     </ClInclude>
-    <ClInclude Include="enumerate.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="pointer_iterator.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="take.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="remove_if.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="take.h">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="enumerate.h">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="cycle.h">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

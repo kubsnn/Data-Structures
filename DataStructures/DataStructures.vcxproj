@@ -161,6 +161,7 @@
     <ClInclude Include="remove_if.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="take.h" />
+    <ClInclude Include="transform.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>

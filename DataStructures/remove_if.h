@@ -2,98 +2,97 @@
 
 #include "Utility.h"
 
-template <class _Container, class _Fun, bool lvalue_reference>
-class _Remove_if : _Container_wrapper<_Container, lvalue_reference>
+namespace pipeline
 {
-public:
-	using iterator = typename _Container::iterator;
-	using const_iterator = typename _Container::const_iterator;
+	template <class _Iter, class _Fun>
+	struct _Remove_if_iterator;
 
-	using base = _Container_wrapper<_Container, lvalue_reference>;
+	template <class _Container, class _Fun, bool lvalue_reference>
+	class _Remove_if : _Container_wrapper<_Container, lvalue_reference>
+	{
+	public:
+		using container_iterator = typename _Container::iterator;
+		using container_const_iterator = typename _Container::const_iterator;
 
-	using base::base;
-	using base::_Data;
+		using iterator = _Remove_if_iterator<container_iterator, _Fun>;
+		using const_iterator = _Remove_if_iterator<container_const_iterator, _Fun>;
 
-	constexpr _Remove_if(_Container&& _C, _Fun _Func)
-		: base(move(_C))
-		, _Fn(_Func)
-		, _End(unwrap(_Data.end()))
-		, _CEnd(unwrap(_Data.end())) {
-		run();
-	}
-	constexpr _Remove_if(_Container& _C, _Fun _Func)
-		: base(_C)
-		, _Fn(_Func)
-		, _End(unwrap(_Data.end()))
-		, _CEnd(unwrap(_Data.end())) {
-		run();
-	}
-	constexpr void run() {
-		auto _Next = find_if(_Data.begin(), _Data.end(), _Fn);
-		if (_Next == _Data.end()) return;
+		using base = _Container_wrapper<_Container, lvalue_reference>;
+		using base::_Data;
 
-		auto it = _Data.begin();
-		for (; it != _Data.end(); ++it) {
-			if (!_Fn(*it)) {
-				*_Next = move(*it);
-				++_Next;
-			}
+		constexpr _Remove_if(_Container& _C, _Fun _Func)
+			: base(_C)
+			, _Fn(_Func)
+		{ }
+		constexpr _Remove_if(_Container&& _C, _Fun _Func)
+			: base(move(_C))
+			, _Fn(_Func)
+		{ }
+		constexpr auto begin() {
+			return _Remove_if_iterator(_Data.begin(), _Fn, _Data.end());
 		}
-		_End = _Next;
-		_CEnd = const_iterator(unwrap(_Next));
-	}
-	constexpr iterator begin() {
-		return iterator(_Data.begin());
-	}
-	constexpr const_iterator begin() const {
-		return const_iterator(_Data.begin());
-	}
-	constexpr iterator end() {
-		return _End;
-	}
-	constexpr const_iterator end() const {
-		return _CEnd;
-	}
-private:
-	_Fun _Fn;
-	iterator _End;
-	const_iterator _CEnd;
-};
+		constexpr auto begin() const {
+			return _Remove_if_iterator(_Data.begin(), _Fn, _Data.end());
+		}
+		constexpr auto end() {
+			return _Remove_if_iterator(_Data.end(), _Fn, _Data.end());
+		}
+		constexpr auto end() const {
+			return _Remove_if_iterator(_Data.end(), _Fn, _Data.end());
+		}
+	private:
+		_Fun _Fn;
+	};
 
-struct remove_if_fn;
+	template <class _Iter, class _Fun>
+	struct _Remove_if_iterator
+	{
+	public:
+		using category = forward_iterator;
 
-template <class _Fun>
-struct _Remove_if_fun 
-{
-	const remove_if_fn& _Rm;
-	_Fun _Fn;
-};
+		constexpr _Remove_if_iterator(_Iter _Iterator, _Fun _Function, _Iter _End) 
+			: _It(_Iterator)
+			, _Fn(_Function)
+			, _End(_End)
+		{ }
+		constexpr decltype(auto) operator*() {
+			return *_It;
+		}
+		constexpr decltype(auto) operator++() {
+			while (_Fn(*++_It)) {
+				if (_It == _End) break;
+			}
+			return *this;
+		}
+		constexpr auto operator++(int) {
+			auto _Tmp = *this;
+			++*this;
+			return *this;
+		}
+		constexpr friend bool operator==(const _Remove_if_iterator& _Left, const _Remove_if_iterator& _Right) {
+			return _Left._It == _Right._It;
+		}
+	private:
+		_Iter _It;
+		_Iter _End;
+		_Fun _Fn;
+	};
 
-struct remove_if_fn
-{
-	template <class _Container, class _Fun>
-	constexpr _Remove_if<_Container, _Fun, true> operator()(_Container& _C, _Fun _Func) const {
-		_Remove_if<_Container, _Fun, true> f(_C, _Func);
-		return f;
-	}
-	template <class _Container, class _Fun>
-	constexpr _Remove_if<_Container, _Fun, false> operator()(_Container&& _C, _Fun _Func) const {
-		return _Remove_if<_Container, _Fun, false>(move(_C), _Func);
-	}
-	template <class _Fun>
-	constexpr _Remove_if_fun<_Fun> operator()(_Fun _Func) const {
-		return { *this, _Func };
-	}
-};
+	struct remove_if_fn
+	{
+		template <class _Fun>
+		constexpr _Pipe_obj_arg<remove_if_fn, _Fun> operator()(_Fun _Fn) const {
+			return { *this, _Fn };
+		}
+		template <class _Container, class _Fun>
+		constexpr _Remove_if<_Container, _Fun, true> operator()(_Container& _C, _Fun _Fn) const {
+			return _Remove_if<_Container, _Fun, true>(_C, _Fn);
+		}
+		template <class _Container, class _Fun>
+		constexpr _Remove_if<_Container, _Fun, false> operator()(_Container&& _C, _Fun _Fn) const {
+			return _Remove_if<_Container, _Fun, false>(move(_C), _Fn);
+		}
+	};
 
-constexpr remove_if_fn remove_if = {};
-
-template <class _Container, class _Fun>
-constexpr _Remove_if<_Container, _Fun, true> operator|(_Container& _C, const _Remove_if_fun<_Fun>& _Func) {
-	return _Func._Rm(_C, _Func._Fn);
-}
-
-template <class _Container, class _Fun>
-constexpr _Remove_if<_Container, _Fun, false> operator|(_Container&& _C, const _Remove_if_fun<_Fun>& _Func) {
-	return _Func._Rm(move(_C), _Func._Fn);
+	constexpr remove_if_fn remove_if = {};
 }

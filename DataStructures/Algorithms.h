@@ -2,6 +2,36 @@
 
 #include "memory.h"
 
+#if __CPPVER >= 201703L
+
+#include "cycle.h"
+#include "enumerate.h"
+#include "remove_if.h"
+#include "take.h"
+#include "transform.h"
+
+namespace pipeline
+{
+    template <class _Container, class _Fun>
+    constexpr auto operator|(_Container& _C, _Fun _Fn) {
+        return _Fn(_C);
+    }
+    template <class _Container, class _Fun, class _Arg>
+    constexpr auto operator|(_Container&& _C, _Fun _Fn) {
+        return _Fn(move(_C));
+    }
+    template <class _Container, class _Fun, class _Arg>
+    constexpr auto operator|(_Container& _C,  _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+        return _Fn._Fn(_C, _Fn._Arg);
+    }
+    template <class _Container, class _Fun, class _Arg>
+    constexpr auto operator|(_Container&& _C, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+        return _Fn._Fn(move(_C), _Fn._Arg);
+    }
+}
+
+#endif
+
 template<class _Ty = void>
 struct less
 {

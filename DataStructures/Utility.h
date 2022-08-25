@@ -450,10 +450,63 @@ constexpr bool is_rvalue<_Ty&> = false;
 template <class _Ty>
 constexpr bool is_rvalue<_Ty&&> = true;
 
-template <class It, class Pred>
-constexpr It find_if(It _First, It _Last, Pred _Pr) {
+template <class _Ty>
+constexpr bool is_const = false;
+
+template <class _Ty>
+constexpr bool is_const<const _Ty> = true;
+
+#if __CPPVER >= 201703L
+
+namespace pipeline
+{
+	template <class _Fun, class _Arg>
+	struct _Pipe_obj_arg
+	{
+		const _Fun& _Fn;
+		_Arg _Arg;
+	};
+	template <class _Fun>
+	struct _Pipe_obj
+	{
+		const _Fun& _Fn;
+	};
+	struct sentinel { };
+}
+#endif
+
+template <class Iter, class Pred>
+constexpr Iter find_if(Iter _First, Iter _Last, Pred _Pr) {
 	for (; _First != _Last; ++_First) {
 		if (_Pr(*_First)) return _First;
 	}
 	return _Last;
+}
+
+template <class Iter, class Fun>
+constexpr void transform(Iter _First, Iter _Last, Fun _Fn) {
+	for (; _First != _Last; ++_First) {
+		*_First = _Fn(*_First);
+	}
+}
+
+template <class Iter, class Fun, class CondFun>
+constexpr void transform_if(Iter _First, Iter _Last, Fun _Fn, CondFun _Condition_fn) {
+	for (; _First != _Last; ++_First) {
+		if (_Condition_fn(*_First)) *_First = _Fn(*_First);
+	}
+}
+
+template <class Iter, class _Ty>
+constexpr void replace(Iter _First, Iter _Last, const _Ty& _Old_value, const _Ty& _New_value) {
+	for (; _First != _Last; ++_First) {
+		if (*_First == _Old_value) *_First = _New_value;
+	}
+}
+
+template <class Iter, class _Fun, class _Ty>
+constexpr void replace_if(Iter _First, Iter _Last, _Fun _Fn, const _Ty& _New_value) {
+	for (; _First != _Last; ++_First) {
+		if (_Fn(*_First)) *_First = _New_value;
+	}
 }
