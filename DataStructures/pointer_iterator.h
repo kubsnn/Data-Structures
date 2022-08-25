@@ -8,6 +8,9 @@ struct pointer_iterator
 public:
 	using category = random_access_iterator;
 
+	constexpr pointer_iterator()
+		: _Pos(nullptr)
+	{ }
 	constexpr pointer_iterator(_Ty* _Pointer)
 		: _Pos(_Pointer)
 	{ }

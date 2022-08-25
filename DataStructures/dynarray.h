@@ -10,8 +10,7 @@ class dynarray
 public:
 	using iterator = pointer_iterator<_Ty>;
 	using const_iterator = pointer_iterator<const _Ty>;
-
-	using category = random_access_iterator;
+	using value_type = _Ty;
 
 	constexpr dynarray();
 	constexpr dynarray(size_t _Array_size);

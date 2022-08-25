@@ -15,6 +15,8 @@ public:
 	using node = forward_list_node<_Ty>;
 	using iterator = forward_list_iterator<_Ty>;
 	using const_iterator = forward_list_iterator<const _Ty>;
+	using value_type = _Ty;
+
 	forward_list();
 	forward_list(const forward_list& _Other);
 	forward_list(forward_list&& _Other) noexcept;
@@ -29,6 +31,7 @@ public:
 
 	void remove(const _Ty& _Val);
 	void remove_at(unsigned int _Index);
+	iterator remove(iterator _Where);
 
 	_Ty& at(unsigned int _Index);
 	const _Ty& at(unsigned int _Index) const;
@@ -104,7 +107,7 @@ template <class _Ty>
 struct forward_list_iterator
 {
 public:
-	using category = complex_iterator;
+	using category = forward_iterator;
 
 	using node = forward_list_node<remove_const_t<_Ty>>;
 	using iterator = forward_list_iterator<_Ty>;
@@ -257,6 +260,30 @@ inline void forward_list<_Ty>::remove_at(unsigned int _Index)
 	node* _Next = _Tmp->_Next->_Next;
 	delete _Tmp->_Next;
 	_Tmp->_Next = _Next;
+}
+
+template<class _Ty>
+inline forward_list_iterator<_Ty> forward_list<_Ty>::remove(iterator _Where)
+{
+	--_Size;
+
+	if (_Where == _Head) {
+		node* _Next = _Head->_Next;
+		delete _Head;
+		_Head = _Next;
+		return _Head;
+	}
+
+	node* _Tmp = _Head;
+
+	while (_Tmp->_Next != _Where) {
+		_Tmp = _Tmp->_Next;
+	}
+
+	node* _Next = _Tmp->_Next->_Next;
+	delete _Tmp->_Next;
+	_Tmp->_Next = _Next;
+	return iterator(_Tmp->_Next);
 }
 
 template<class _Ty>
