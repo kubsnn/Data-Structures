@@ -10,6 +10,7 @@ class vector
 public:
 	using iterator = pointer_iterator<_Ty>;
 	using const_iterator = pointer_iterator<const _Ty>;
+	using value_type = _Ty;
 
 	friend struct iterator;
 	friend struct const_iterator;
@@ -37,6 +38,7 @@ public:
 	constexpr void emplace(unsigned int _Index, _Values&&... _Vals);
 
 	constexpr void remove_at(unsigned int _Index);
+	constexpr iterator remove(iterator _Where);
 
 	constexpr size_t size() const;
 	constexpr size_t _max_size() const;
@@ -203,6 +205,17 @@ inline constexpr void vector<_Ty, _Allocator>::remove_at(unsigned int _Index)
 	--_Size;
 	_Allocator::destroy(_Data[_Index]);
 	_Move_in_place(_Data + _Index + 1, _Data + _Index, _Size - _Index);
+}
+
+template<class _Ty, class _Allocator>
+inline constexpr pointer_iterator<_Ty> vector<_Ty, _Allocator>::remove(iterator _Where)
+{
+	auto _Ptr = _Where.unwrap();
+	size_t _Index = _Ptr - _Data;
+	--_Size;
+	_Allocator::destroy(_Ptr);
+	_Move_in_place(_Data + _Index + 1, _Data + _Index, _Size - _Index);
+	return _Where;
 }
 
 template<class _Ty, class _Allocator>

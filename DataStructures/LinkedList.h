@@ -15,7 +15,7 @@ class linkedlist
 public:
 	using iterator = linkedlist_iterator<_Ty>;
 	using const_iterator = linkedlist_iterator<const _Ty>;
-
+	using value_type = _Ty;
 	using node = linkedlist_node<_Ty>;
 
 	linkedlist();
@@ -34,6 +34,7 @@ public:
 	void emplace(unsigned int _Index, _Values&&... _Vals) noexcept;
 	bool remove_at(unsigned int _Index);
 	bool remove(const _Ty& _Val);
+	iterator remove(iterator _Where);
 	bool pop_begin();
 	bool pop_back();
 	void clear();
@@ -216,6 +217,25 @@ inline bool linkedlist<_Ty>::remove(const _Ty& _Val)
 		_Tmp = _Tmp->next;
 	}
 	return false;
+}
+
+template<class _Ty>
+inline linkedlist_iterator<_Ty> linkedlist<_Ty>::remove(iterator _Where)
+{
+	if (_Where == _Tail) return pop_back();
+	if (_Where == _Head) return pop_begin();
+
+	auto node = _Where._List;
+	auto prev = node->prev;
+	auto next = node->next;
+
+	delete node;
+
+	prev->next = next;
+	next->prev = prev;
+
+	--_Size;
+	return true;
 }
 
 template <class _Ty>
@@ -586,7 +606,8 @@ struct linkedlist_iterator
 	friend class linkedlist<remove_const_t<_Ty>>;
 public:
 	using node = linkedlist_node<remove_const_t<_Ty>>;
-	using category = complex_iterator;
+	using category = bidirectional_iterator;
+
 	linkedlist_iterator();
 	linkedlist_iterator(node* const& _Ptr);
 	linkedlist_iterator(node*&& _Ptr);
@@ -596,6 +617,8 @@ public:
 	_Ty& operator*();
 	linkedlist_iterator<_Ty>& operator++();
 	linkedlist_iterator<_Ty> operator++(int);
+	linkedlist_iterator<_Ty>& operator--();
+	linkedlist_iterator<_Ty> operator--(int);
 
 	bool operator==(const linkedlist_iterator<_Ty>& _Right) const;
 	bool operator!=(const linkedlist_iterator<_Ty>& _Right) const;
@@ -656,6 +679,21 @@ inline linkedlist_iterator<_Ty> linkedlist_iterator<_Ty>::operator++(int)
 {
 	auto p = *this;
 	_List = _List->next;
+	return *p;
+}
+
+template<class _Ty>
+inline linkedlist_iterator<_Ty>& linkedlist_iterator<_Ty>::operator--()
+{
+	_List = _List->prev;
+	return *this;
+}
+
+template<class _Ty>
+inline linkedlist_iterator<_Ty> linkedlist_iterator<_Ty>::operator--(int)
+{
+	auto p = *this;
+	_List = _List->prev;
 	return *p;
 }
 

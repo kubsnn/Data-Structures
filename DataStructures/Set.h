@@ -19,7 +19,8 @@ class set : protected hashtable<_Ty, SetEmptyEl>
 public:
 	using base = hashtable<_Ty, SetEmptyEl>;
 	using const_iterator = set_const_iterator<const _Ty>;
-	
+	using value_type = _Ty;
+
 	set();
 	set(const set& _Set);
 	set(set&& _Set) noexcept;

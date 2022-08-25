@@ -19,6 +19,7 @@ public:
 	using bucket_type = forward_list<pair>*;
 	using iterator = hashtable_iterator<pair>; // [C++20 >] hashtable_iterator<compressed_pair<const _TKey, _TValue>>
 	using const_iterator = hashtable_iterator<const pair>;
+	using value_type = pair;
 
 	hashtable();
 	hashtable(const hashtable& _Table);
@@ -393,12 +394,13 @@ template <class _Ty>
 struct hashtable_iterator
 {
 public:
-	using category = complex_iterator;
+	using category = forward_iterator;
 
 	using bucket_type = forward_list<remove_const_t<_Ty>>*;
 	using first_type = typename _Ty::first_type;
 	using second_type = typename _Ty::second_type;
 	using iterator = hashtable_iterator<_Ty>;
+
 	friend class hashtable<remove_const_t<first_type>, remove_const_t<second_type>>;
 	hashtable_iterator(bucket_type* _List, size_t _Size);
 

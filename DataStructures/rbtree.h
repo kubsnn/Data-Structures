@@ -23,6 +23,7 @@ public:
 	using node = rbnode<_Ty>;
 	using iterator = rbtree_iterator<_Ty>;
 	using const_iterator = rbtree_iterator<const _Ty>;
+	using value_type = _Ty;
 
 	constexpr rbtree();
 	constexpr rbtree(const rbtree& _Other);
@@ -413,28 +414,28 @@ public:
 	friend struct rbtree_iterator<_Ty>;
 	friend struct rbtree_iterator<const _Ty>;
 
-	rbnode()
+	constexpr rbnode()
 		: value()
 	{ }
-	rbnode(const _Ty& _Value)
+	constexpr rbnode(const _Ty& _Value)
 		: color(rbcolor::RED), value(_Value)
 	{ }
-	rbnode(const _Ty& _Value, const rbcolor& _Color)
+	constexpr rbnode(const _Ty& _Value, const rbcolor& _Color)
 		: color(_Color), value(_Value)
 	{ }
-	rbnode(_Ty&& _Value)
+	constexpr rbnode(_Ty&& _Value)
 		: color(rbcolor::RED), value(move(_Value))
 	{ }
 	template <class... _Values>
-	rbnode(_Values&&... _Vals)
+	constexpr rbnode(_Values&&... _Vals)
 		: value(forward<_Values>(_Vals)...)
 		, color(rbcolor::RED)
 	{ }
-	rbnode(const rbnode& _Other)
+	constexpr rbnode(const rbnode& _Other)
 		: color(_Other.color), value(_Other.value)
 		, left(_Other.left), right(_Other.right), parent(_Other.parent)
 	{ }
-	rbnode(rbnode&& _Other)
+	constexpr rbnode(rbnode&& _Other)
 		: color(_Other.color), value(move(_Other.value))
 		, left(_Other.left), right(_Other.right), parent(_Other.parent)
 	{ }
@@ -465,7 +466,7 @@ template <class _Ty>
 struct rbtree_iterator
 {
 public:
-	using category = complex_iterator;
+	using category = forward_iterator;
 
 	using node = rbnode<remove_const_t<_Ty>>;
 	using rbtree = rbtree<remove_const_t<_Ty>>;
