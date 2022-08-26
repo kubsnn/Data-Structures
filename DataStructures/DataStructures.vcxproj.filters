@@ -89,5 +89,11 @@
     <ClInclude Include="zip.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="unique.hpp">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="apply.hpp">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

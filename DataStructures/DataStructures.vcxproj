@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
+    <ClInclude Include="apply.hpp" />
     <ClInclude Include="array.h" />
     <ClInclude Include="cycle.hpp" />
     <ClInclude Include="dynarray.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="Set.h" />
     <ClInclude Include="take.hpp" />
     <ClInclude Include="transform.hpp" />
+    <ClInclude Include="unique.hpp" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="zip.hpp" />

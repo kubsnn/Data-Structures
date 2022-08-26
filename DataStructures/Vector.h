@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 #include "memory.h"
 #include "pointer_iterator.h"
 
@@ -426,3 +426,25 @@ inline constexpr void vector<_Ty, _Allocator>::_Clear()
 	_Data = nullptr;
 }
 
+#ifdef __APPLY_HPP__
+
+namespace pipeline {
+	struct to_vector_fn
+	{
+		template <class _Range>
+		constexpr auto operator()(_Range&& _Rng) const {
+			size_t _Size = distance(_Rng.begin(), _Rng.end());
+
+			vector<typename _Range::value_type> _Vec;
+			_Vec.reserve(_Size);
+			
+			for (auto&& e : _Rng) {
+				_Vec.emplace_back(move(e));
+			}
+
+			return _Vec;
+		}
+	};
+	constexpr to_vector_fn to_vector = {};
+}
+#endif // __APPLY_HPP__

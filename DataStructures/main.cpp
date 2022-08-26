@@ -105,258 +105,63 @@ struct my_alloc : _STD allocator<T>
     }
 };
 
-
-#define log(x) _STD cout << x << _STD endl
-
-
-
-struct emptyt{};
-
-#include <chrono>
-using namespace std::chrono;
-
-int add_xor(const int N, int B) {
-    int sum = 0;
-    for (int i = 0; i < N; ++i) {
-        sum += i ^ B;
-    }
-    return sum;
-}
-
-int iff(const int N, int B) {
-    int sum = 0;
-    int a = B << 1;
-    for (int i = 0; i < N; ++i) {
-        if (i > B) {
-            if (i < a) sum += i;
-        }
-    }
-    return sum;
-}
-
-template <class Func>
-void checktime(Func func, const int N) {
-    auto start = high_resolution_clock::now();
-    func(N, N / 3);
-    auto end = high_resolution_clock::now();
-    int diff = duration_cast<microseconds>(end - start).count();
-    _STD cout << diff << " us" << _STD endl;
-}
-
 #include "rbtree.h"
 #include "map.h"
-
-
-template <class container>
-container test_create(size_t n) {
-
-    auto begin = high_resolution_clock::now();
-    container data;
-    for (int i = 0; i < n; ++i) {
-        data.insert(i, i + 1);
-    }
-
-    auto end = high_resolution_clock::now();
-    dbg _CHRONO duration_cast<_CHRONO milliseconds>(end - begin).count() << nl;
-    return data;
-}
-
-template <class container>
-void test_access(container& data) {
-    int sum = 0;
-    auto begin = high_resolution_clock::now();
-
-    for (int i = 0; i < data.size(); ++i) {
-        sum += data[i];
-    }
-
-    auto end = high_resolution_clock::now();
-    dbg _CHRONO duration_cast<_CHRONO milliseconds>(end - begin).count() << nl;
-    dbg "sum: " << sum << nl;
-}
-
-
-template <class container>
-void test_iterate(container& data) {
-    int sum = 0;
-    auto begin = high_resolution_clock::now();
-
-   // for (auto& [k, v] : data) {
-   //    sum += v;
-   // }
-
-    auto end = high_resolution_clock::now();
-    dbg _CHRONO duration_cast<_CHRONO milliseconds>(end - begin).count() << nl;
-    dbg "sum: " << sum << nl;
-}
-
 #include "memory.h"
 
-struct f {
-    f() {
-   //     dbg "CREATED" << nl;
-    }
-    f(int d, int e) : x(d), y(e) {
- //       dbg "CREATED" << nl;
-    }
-    f(const f& other) 
-        : x(other.x), y(other.y) {
-   //     dbg "COPIED" << nl;
-    }
-    f(f&& other) noexcept
-        : x(other.x), y(other.y) {
-  //      dbg "MOVED" << nl;
-    }
-    f& operator=(const f& other) {
-        x = other.x;
-        y = other.y;
-   //     dbg "=COPIED" << nl;
-        return *this;
-    }
-    f& operator=(f&& other) noexcept {
-        x = other.x;
-        y = other.y;
-  //      dbg "=MOVED" << nl;
-        return *this;
-    }
-    int x = 0;
-    int y = 0;
-};
 
-_STD vector<f>::const_iterator get_at(_STD vector<f>& v, int index) {
-    auto it = v.begin();
-    for (int i = 0; i < index; ++i) {
-        ++it;
-    }
-    return it;
-}
+unsigned short lfsr = 0xACE1u;
+unsigned bit;
 
-void test_allocs()
+unsigned rands()
 {
-    TIME_START
-        int n = 8;
-        auto data = allocator<f>::allocate(n);
-        for (int i = 0; n < 200000; ++i) {
-            size_t new_size = n * 2;
-            auto buff = allocator<f>::allocate(new_size);
-            _Move_in_place(data, buff, n);
-            allocator<f>::deallocate(data);
-            data = buff;
-            n = new_size;
-        }
-    TIME_END
-    auto merge = [](f** buffers, int size, int count) {
-        f* new_buff = allocator<f>::allocate(size * count);
-        for (int i = 0; i < count; ++i) {
-            _Move_in_place(buffers[i], new_buff + i * size, size);
-            allocator<f>::deallocate(buffers[i]);
-        }
-        buffers[0] = new_buff;
-    };
-    TIME_START
-       int n = 8;
-       int buffer_count = 1;
-       f** buffers = new f* [10000];
-
-       buffers[0] = allocator<f>::allocate(n);
-       for (int i = 0; n * buffer_count < 200000; ++i) {
-           for (int j = 1; j < buffer_count; ++j) {
-               buffers[j] = allocator<f>::allocate(n);
-           }
-           merge(buffers, n, buffer_count);
-           n <<= 1;
-           buffer_count = n / 8;
-       }
-    TIME_END
+    bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1;
+    return lfsr = (lfsr >> 1) | (bit << 15);
 }
+#include <thread>
 
+#ifdef _M_IX86                      // Processor: x86
 
-
-struct greater_t
+inline uint64_t clockCycleCount()
 {
-     bool operator()(int& _Left, int& _Right) const
-    {
-        //dbg "!";
-        return _Left < _Right;
+    uint64_t c;
+    __asm {
+        cpuid       // serialize processor
+        rdtsc       // read time stamp counter
+        mov dword ptr[c + 0], eax
+        mov dword ptr[c + 4], edx
     }
-};
-
-#include "cycle.h"
-#include "enumerate.h"
-greater_t greaterr;
-
-
-template <class T>
-void ff(T arg) {
-    dbg is_rvalue<T> << nl;
+    return c; 
 }
+
+#elif defined(_M_X64)               // Processor: x64
+
+extern "C" unsigned __int64 __rdtsc();
+#pragma intrinsic(__rdtsc)
+inline uint64_t clockCycleCount()
+{
+    return __rdtsc();
+}
+
+#endif
 
 #include <ranges>
 
+using namespace pipeline;
+
 int main()
 {
-   // std::_Get_unwrapped
-  //  std::vector
-    auto data = range<array<int, 16>>(2);
+    auto data = range<int, vector>(10, -2);
 
-    pointer_iterator<int> it = data.begin();
-
-    auto tmp = it + 2;
-
-    for (auto&& [i, e] : data | cycle | enumerate) {
+    auto rng = data | transform([](int x) {return x + 1; })
+                    | remove_if([](int x) {return x % 3 == 0;})
+                    | cycle
+                    | take(12)
+                    | enumerate
+                    | to_vector;
+    
+    for (auto&& [i, e] : rng) {
         dbg i << " " << e << nl;
-        e++;
     }
-  //  cycle(data);
-
-   // cycle c(range<int, vector>(10));
-
-   // for (auto e : cycle(data)) {
-   //     dbg e << " ";
-   // }
-
-
-    //{
-    //    auto begin = high_resolution_clock::now();
-    //    vector<vector<int>> v;
-    //    for (int i = 0; i < 50; ++i) {
-    //        for (int j = 0; j < 1000; ++j) {
-    //            vector<int> u;
-    //           // u.reserve(10000);
-    //            for (int k = 0; k < 10000; ++k) {
-    //                u.append(i + j + k);
-    //            }
-    //            v.append(u);
-    //        }
-    //        for (int j = 0; j < 1000; ++j) {
-    //            v.remove_at(0);
-    //        }
-    //       // v.clear();
-    //    }
-    //    auto end = high_resolution_clock::now();
-    //    dbg "my vector: ";
-    //    dbg _CHRONO duration_cast<_CHRONO milliseconds>(end - begin).count() << "ms" << nl;
-    //}
-    //{
-    //    auto begin = high_resolution_clock::now();
-    //    _STD vector<_STD vector<int>> v;
-    //    for (int i = 0; i < 50; ++i) {
-    //        for (int j = 0; j < 1000; ++j) {
-    //            _STD vector<int> u;
-    //           // u.reserve(10000);
-    //            for (int k = 0; k < 10000; ++k) {
-    //                u.push_back(i + j + k);
-    //            }
-    //            v.push_back(u);
-    //        }
-    //        for (int j = 0; j < 1000; ++j) {
-    //            v.erase(v.begin());
-    //        }
-    //      //  v.clear();
-    //    }
-    //    auto end = high_resolution_clock::now();
-    //    dbg "std vector: ";
-    //    dbg _CHRONO duration_cast<_CHRONO milliseconds>(end - begin).count() << "ms" << nl;
-    //}
 }
 
