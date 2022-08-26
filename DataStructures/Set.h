@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 #include "Hash.h"
 #include "compressed_pair.h"
 #include "HashTable.h"
