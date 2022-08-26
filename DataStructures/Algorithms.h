@@ -10,6 +10,9 @@
 #include "take.hpp"
 #include "transform.hpp"
 #include "zip.hpp"
+#include "unique.hpp"
+
+#include "apply.hpp"
 
 namespace pipeline
 {
@@ -235,25 +238,28 @@ inline constexpr void reverse(_Iter _First, _Iter _Last)
 
 #if __CPPVER >= 201703L
 
-struct sorted_fn
+
+namespace pipeline
 {
+    struct sorted_fn
+    {
+        template <class _Ty>
+        constexpr _Ty& operator()(_Ty& _Val) const {
+            sort(_Val.begin(), _Val.end());
+            return _Val;
+        }
+    };
+
+    constexpr sorted_fn sorted = {};
+
     template <class _Ty>
-    constexpr _Ty& operator()(_Ty& _Val) const {
-        sort(_Val.begin(), _Val.end());
-        return _Val;
+    _Ty& operator|(_Ty& _Val, const sorted_fn& s) {
+        return s(_Val);
     }
-};
 
-constexpr const sorted_fn sorted = {};
-
-template <class _Ty>
-_Ty& operator|(_Ty& _Val, const sorted_fn& s) {
-    return s(_Val);
+    template <class _Ty>
+    _Ty operator|(_Ty&& _Val, const sorted_fn& s) {
+        return s(_Val);
+    }
 }
-
-template <class _Ty>
-_Ty operator|(_Ty&& _Val, const sorted_fn& s) {
-    return s(_Val);
-}
-
 #endif

@@ -11,6 +11,7 @@ namespace pipeline
 	class _Transform : _Container_wrapper<_Container, lvalue_ref>
 	{
 	public:
+
 		using container_iterator = typename _Container::iterator;
 		using container_const_iterator = typename _Container::const_iterator;
 
@@ -40,6 +41,8 @@ namespace pipeline
 		constexpr auto end() const {
 			return _Transform_iterator(_Data.end(), _Fn);
 		}
+
+		using value_type = typename _Container::value_type;
 	private:
 		_Fun _Fn;
 	};

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utility.h"
+#include "utility.h"
 
 #pragma pack (push, 1)
 
@@ -43,6 +43,8 @@ public:
 	template <class ..._Values>
 	constexpr void emplace(_Values&&... _Vals);
 
+	constexpr void remove(const _Ty& _Val);
+
 	constexpr iterator find(const _Ty& _Val);
 	constexpr const_iterator find(const _Ty& _Val) const;
 	int depth() const;
@@ -59,6 +61,7 @@ private:
 	constexpr void _Insert(node* _Node);
 	constexpr bool _Bst_insert(node* const& _New, node*& _Curr, node* const _Prev);
 	constexpr void _Insert_fixup(node* _Node);
+	constexpr void _Remove_fixup(node* _Node, node* _Prev);
 	constexpr node* _Find(node* _Begin, const _Ty& _Val) const;
 	constexpr void _Rotate_left(node* _Node);
 	constexpr void _Rotate_right(node* _Node);
@@ -154,6 +157,76 @@ template<class _Ty>
 inline constexpr void rbtree<_Ty>::insert(_Ty&& _Val)
 {
 	_Emplace(move(_Val));
+}
+
+template<class _Ty>
+inline constexpr void rbtree<_Ty>::remove(const _Ty& _Val)
+{
+	//red black tree remove _Val
+	node* _Curr = _Get_root();
+	node* _Prev = nullptr;
+	while (_Curr != nullptr)
+	{
+		if (_Curr->value == _Val)
+		{
+			break;
+		}
+		_Prev = _Curr;
+		_Curr = _Curr->value < _Val ? _Curr->right : _Curr->left;
+	}
+	if (_Curr == nullptr) return;
+	if (_Curr->left == nullptr)
+	{
+		if (_Curr->right != nullptr)
+		{
+			_Curr->right->parent = _Prev;
+		}
+		if (_Prev == nullptr)
+		{
+			_Get_root() = _Curr->right;
+		}
+		else if (_Prev->left == _Curr)
+		{
+			_Prev->left = _Curr->right;
+		}
+		else
+		{
+			_Prev->right = _Curr->right;
+		}
+		delete _Curr;
+	}
+	else if (_Curr->right == nullptr)
+	{
+		if (_Curr->left != nullptr)
+		{
+			_Curr->left->parent = _Prev;
+		}
+		if (_Prev == nullptr)
+		{
+			_Get_root() = _Curr->left;
+		}
+		else if (_Prev->left == _Curr)
+		{
+			_Prev->left = _Curr->left;
+		}
+		else
+		{
+			_Prev->right = _Curr->left;
+		}
+		delete _Curr;
+	}
+	else
+	{
+		node* _Next = _Curr->right;
+		while (_Next->left != nullptr)
+		{
+			_Next = _Next->left;
+		}
+		_Curr->value = _Next->value;
+		_Remove_fixup(_Next, _Prev);
+		delete _Next;
+	}
+
 }
 
 template<class _Ty>
@@ -297,6 +370,77 @@ inline constexpr void rbtree<_Ty>::_Insert_fixup(node* _Node)
 	}
 	_Get_root()->color = rbcolor::BLACK;
 	_Get_root()->parent = _Super_root;
+}
+
+template<class _Ty>
+inline constexpr void rbtree<_Ty>::_Remove_fixup(node* _Next, node* _Prev)
+{
+	while (_Next != _Get_root() && _Get_color(_Next) == rbcolor::BLACK) {
+		node* parent = _Next->parent;
+		if (parent == _Prev) {
+			_Next = _Next->right;
+			_Prev = _Next->parent;
+		} else {
+			_Next = _Next->left;
+			_Prev = _Next->parent;
+		}
+		node* grandparent = _Next->parent->parent;
+		if (grandparent->left == parent) {
+			node* uncle = grandparent->right;
+			if (_Get_color(uncle) == rbcolor::RED) {
+				_Set_color(uncle, rbcolor::BLACK);
+				_Set_color(parent, rbcolor::RED);
+				_Rotate_left(parent);
+				uncle = grandparent->right;
+			}
+			if (_Get_color(uncle->left) == rbcolor::BLACK && _Get_color(uncle->right) == rbcolor::BLACK) {
+				_Set_color(uncle, rbcolor::RED);
+				_Next = grandparent;
+				_Prev = grandparent->parent;
+			}
+			else {
+				if (_Get_color(uncle->right) == rbcolor::BLACK) {
+					_Set_color(uncle->left, rbcolor::BLACK);
+					_Set_color(uncle, rbcolor::RED);
+					_Rotate_right(uncle);
+					uncle = grandparent->right;
+				}
+				_Set_color(uncle, grandparent->color);
+				_Set_color(grandparent, rbcolor::BLACK);
+				_Rotate_left(grandparent);
+				_Next = _Get_root();
+				_Prev = _Get_root();
+			}
+		}
+		else {
+			node* uncle = grandparent->left;
+			if (_Get_color(uncle) == rbcolor::RED) {
+				_Set_color(uncle, rbcolor::BLACK);
+				_Set_color(parent, rbcolor::RED);
+				_Rotate_right(parent);
+				uncle = grandparent->left;
+			}
+			if (_Get_color(uncle->right) == rbcolor::BLACK && _Get_color(uncle->left) == rbcolor::BLACK) {
+				_Set_color(uncle, rbcolor::RED);
+				_Next = grandparent;
+				_Prev = grandparent->parent;
+			}
+			else {
+				if (_Get_color(uncle->left) == rbcolor::BLACK) {
+					_Set_color(uncle->right, rbcolor::BLACK);
+					_Set_color(uncle, rbcolor::RED);
+					_Rotate_left(uncle);
+					uncle = grandparent->left;
+				}
+				_Set_color(uncle, grandparent->color);
+				_Set_color(grandparent, rbcolor::BLACK);
+				_Rotate_right(grandparent);
+				_Next = _Get_root();
+				_Prev = _Get_root();
+			}
+		}
+	}
+	_Set_color(_Next, rbcolor::BLACK);
 }
 
 template<class _Ty>
@@ -447,6 +591,9 @@ public:
 	}
 	constexpr bool is_red() {
 		return color == rbcolor::RED;
+	}
+	constexpr rbnode* sibling() {
+		return parent->left == this ? parent->right : parent->left;
 	}
 private:
 	rbcolor color;

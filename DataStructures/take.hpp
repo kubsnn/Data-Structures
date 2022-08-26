@@ -11,6 +11,8 @@ namespace pipeline
 	class _Take : _Container_wrapper<_Container, lvalue_reference>
 	{
 	public:
+		using value_type = typename _Container::value_type;
+
 		using container_iterator = typename _Container::iterator;
 		using container_const_iterator = typename _Container::const_iterator;
 

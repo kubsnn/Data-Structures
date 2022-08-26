@@ -14,6 +14,7 @@ namespace pipeline
 	class _Enumerate : _Container_wrapper<_Container, lvalue_ref>
 	{
 	public:
+
 		using container_iterator = typename _Container::iterator;
 		using container_const_iterator = typename _Container::const_iterator;
 
@@ -22,6 +23,8 @@ namespace pipeline
 
 		using base = _Container_wrapper<_Container, lvalue_ref>;
 		using base::_Data;
+
+		using value_type = enumerate_pair<typename _Container::value_type, false>;//is_lvalue_reference<decltype(*_Data.begin())>>;
 
 		friend struct iterator;
 		friend struct const_iterator;
