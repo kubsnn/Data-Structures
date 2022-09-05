@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,10 +159,12 @@
     <ClInclude Include="map.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="pointer_iterator.h" />
+    <ClInclude Include="random.h" />
     <ClInclude Include="rbtree.h" />
     <ClInclude Include="remove_if.hpp" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="take.hpp" />
+    <ClInclude Include="to_file.hpp" />
     <ClInclude Include="transform.hpp" />
     <ClInclude Include="unique.hpp" />
     <ClInclude Include="utility.h" />
