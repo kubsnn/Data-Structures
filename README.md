@@ -11,6 +11,7 @@ Containers:
 - dynarray   (heap)
 - linkedlist   (bidirectional)
 - forwardlist   (onedir)
+- deque
 
 Pipe functions:
 - cycle   (infinity range)
