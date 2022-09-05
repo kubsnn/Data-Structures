@@ -139,7 +139,7 @@ inline constexpr void vector<_Ty, _Alloc>::push_back(const _Ty& _Val)
 template<class _Ty, class _Alloc>
 inline constexpr void vector<_Ty, _Alloc>::push_back(_Ty&& _Val)
 {
-	_Emplace_back(move<_Ty>(_Val));
+	_Emplace_back(move(_Val));
 }
 
 template<class _Ty, class _Alloc>

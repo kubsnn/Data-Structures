@@ -33,7 +33,6 @@ struct _Empty {};
 		- operator->
 
 	random access iterator requirements:
-		- contiguous memory
 		- unwrap() method which returns pointer to memory
 		- operator<, >, <=, >=
 */
@@ -141,7 +140,7 @@ struct tag_of<_Ty, typename enable_if<typename _Ty::category>::type> {
 template <class _Ty>
 using tag_of_t = typename tag_of<_Ty>::tag;
 
-template <class _Ty, class _Tag>
+template <class _Ty>
 inline constexpr const _Ty& max(const _Ty& _Left, const _Ty& _Right) {
 	return _Left < _Right ? _Right : _Left;
 }

@@ -57,33 +57,33 @@ struct greater
 };
 
 //sortowanie przez wstawianie
-template <class _Ty, class _Pr>
-constexpr void insertion_sort(_Ty* const& _Data, size_t _Size, _Pr _Pred) {
+template <class _It, class _Pr>
+constexpr void insertion_sort(_It _First, size_t _Size, _Pr _Pred) {
     for (int i = 1, j; i < _Size; ++i) {
-        _Ty _Tmp = _Data[i];
-        for (j = i - 1; j >= 0 && _Pred(_Data[j], _Tmp); --j) {
-            _Data[j + 1] = _Data[j];
+        auto _Tmp = _First[i];
+        for (j = i - 1; j >= 0 && _Pred(_First[j], _Tmp); --j) {
+            _First[j + 1] = _First[j];
         }
-        _Data[j + 1] = _Tmp;
+        _First[j + 1] = _Tmp;
     }
 }
 
-template<class _Ty>
-constexpr int median(_Ty* const& _Data, const _Ty& a, const _Ty& b, const _Ty& c) {
-    _Ty x = _Data[a] - _Data[b], y = _Data[b] - _Data[c], z = _Data[a] - _Data[c];
+template<class _It, class _Ty>
+constexpr int median(_It _First, const int& a, const int& b, const int& c) {
+    auto x = _First[a] - _First[b], y = _First[b] - _First[c], z = _First[a] - _First[c];
     return x * y > 0 ? b : x * z > 0 ? c : a;
 }
 
-template<class _Ty, class _Pr>
-constexpr int partition(_Ty* const& _Data, int left, int right, _Pr _Pred) {
-    _Ty pivot = _Data[(right + left) / 2];
+template<class _It, class _Pr>
+constexpr int partition(_It _First, int left, int right, _Pr _Pred) {
+    auto pivot = _First[(right + left) / 2];
     int i = left, j = right;
     while (true) {
-        while (_Pred(_Data[j], pivot)) j--;
-        while (!_Pred(_Data[i], pivot)) i++;
+        while (_Pred(_First[j], pivot)) j--;
+        while (!_Pred(_First[i], pivot)) i++;
 
         if (i < j) {
-            swap(_Data[i], _Data[j]);
+            swap(_First[i], _First[j]);
             i++; j--;
         }
         else {
@@ -92,55 +92,55 @@ constexpr int partition(_Ty* const& _Data, int left, int right, _Pr _Pred) {
     }
 }
 
-template <class _Ty, class _Pr>
-constexpr void heapify(_Ty* const& _Data, int i, size_t n, _Pr _Pred) {
+template <class _It, class _Pr>
+constexpr void heapify(_It _First, int i, size_t n, _Pr _Pred) {
     int root = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
-    if (left < n && _Pred(_Data[left], _Data[root])) root = left;
-    if (right < n&& _Pred(_Data[right], _Data[root])) root = right;
+    if (left < n && _Pred(_First[left], _First[root])) root = left;
+    if (right < n&& _Pred(_First[right], _First[root])) root = right;
 
     if (root != i) {
-        swap(_Data[i], _Data[root]);
-        heapify(_Data, root, n, _Pred);
+        swap(_First[i], _First[root]);
+        heapify(_First, root, n, _Pred);
     }
 }
 
-template <class _Ty, class _Pr>
-constexpr void create_heap(_Ty* const& _Data, size_t _Size, _Pr _Pred) {
+template <class _It, class _Pr>
+constexpr void create_heap(_It _First, size_t _Size, _Pr _Pred) {
     for (int i = _Size / 2 - 1; i >= 0; --i) {
-        heapify(_Data, i, _Size, _Pred);
+        heapify(_First, i, _Size, _Pred);
     }
 }
 
-template <class _Ty, class _Pr>
-constexpr void sort_heap(_Ty* const& _Data, size_t _Size, _Pr _Pred) {
+template <class _It, class _Pr>
+constexpr void sort_heap(_It _First, size_t _Size, _Pr _Pred) {
     for (int i = _Size - 1; i > 0; --i) {
-        swap(_Data[0], _Data[i]);
-        heapify(_Data, 0, i, _Pred);
+        swap(_First[0], _First[i]);
+        heapify(_First, 0, i, _Pred);
     }
 }
 
 //sortowanie introspektywne
-template <class _Ty, class _Pr>
-inline constexpr void intro_sort(_Ty* const& _Data, int left, int right, int depth, _Pr _Pred) {
+template <class _It, class _Pr>
+inline constexpr void intro_sort(_It _First, int left, int right, int depth, _Pr _Pred) {
     if (left >= right) return;
 
     const size_t size = right - left + 1;
     if (size < 32) {
-        insertion_sort(_Data + left, size, _Pred);
+        insertion_sort(_First + left, size, _Pred);
         return;
     }
 
     if (depth == 0) {
-        create_heap(_Data + left, size, _Pred);
-        sort_heap(_Data + left, size, _Pred);
+        create_heap(_First + left, size, _Pred);
+        sort_heap(_First + left, size, _Pred);
         return;
     }
 
-    int piv = partition(_Data, left, right, _Pred);
-    intro_sort(_Data, left, piv, depth - 1, _Pred);
-    intro_sort(_Data, piv + 1, right, depth - 1, _Pred);
+    int piv = partition(_First, left, right, _Pred);
+    intro_sort(_First, left, piv, depth - 1, _Pred);
+    intro_sort(_First, piv + 1, right, depth - 1, _Pred);
 }
 
 template <class _Iter>
