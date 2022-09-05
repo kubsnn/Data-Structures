@@ -85,7 +85,7 @@ namespace pipeline
         template <class _Range, class _Container>
         constexpr void _Apply_range(_Range&& _Rng, _Container& _C) const {
             for (auto&& e : _Rng) {
-                _C.append(move(e));
+                _C.push_back(move(e));
             }
         }
     };

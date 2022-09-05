@@ -17,19 +17,19 @@
 namespace pipeline
 {
     template <class _Container, class _Fun>
-    constexpr auto operator|(_Container& _C, _Fun _Fn) {
+    constexpr decltype(auto) operator|(_Container& _C, _Fun _Fn) {
         return _Fn(_C);
     }
     template <class _Container, class _Fun>
-    constexpr auto operator|(_Container&& _C, _Fun _Fn) {
+    constexpr decltype(auto) operator|(_Container&& _C, _Fun _Fn) {
         return _Fn(move(_C));
     }
     template <class _Container, class _Fun, class _Arg>
-    constexpr auto operator|(_Container& _C,  _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+    constexpr decltype(auto) operator|(_Container& _C,  _Pipe_obj_arg<_Fun, _Arg> _Fn) {
         return _Fn._Fn(_C, _Fn._Arg);
     }
     template <class _Container, class _Fun, class _Arg>
-    constexpr auto operator|(_Container&& _C, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+    constexpr decltype(auto) operator|(_Container&& _C, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
         return _Fn._Fn(move(_C), _Fn._Arg);
     }
 }
@@ -167,7 +167,7 @@ inline constexpr _Container<_Ty> range(size_t _Count, int _Step)
     _Container<_Ty> _Data;
     size_t next = static_cast<size_t>(_Step > 0 ? 0 : (int)(1 - _Count) * _Step);
     for (size_t i = 0; i < _Count; ++i, next += _Step) {
-        _Data.append(next);
+        _Data.push_back(next);
     }
     return _Data;
 }
@@ -177,7 +177,7 @@ inline constexpr _Container<_Ty> range(size_t _Count)
 {
     _Container<_Ty> _Data;
     for (size_t i = 0; i < _Count; ++i) {
-        _Data.append(i);
+        _Data.push_back(i);
     }
     return _Data;
 }
@@ -189,7 +189,7 @@ inline constexpr _Container<_Ty, allocator<_Ty>> range(size_t _Count)
 {
     _Container<_Ty> _Data;
     for (size_t i = 0; i < _Count; ++i) {
-        _Data.append(i);
+        _Data.push_back(i);
     }
     return _Data;
 }
@@ -200,7 +200,7 @@ inline constexpr _Container<_Ty, allocator<_Ty>> range(size_t _Count, int _Step)
     _Container<_Ty> _Data;
     size_t next = static_cast<size_t>(_Step > 0 ? 0 : (int)(1 - _Count) * _Step);
     for (size_t i = 0; i < _Count; ++i, next += _Step) {
-        _Data.append(next);
+        _Data.push_back(next);
     }
     return _Data;
 }

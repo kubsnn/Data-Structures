@@ -110,6 +110,11 @@ public:
 		_Pos -= _Other;
 		return *this;
 	}
+	template <class _NumTy>
+	constexpr _Ty& operator[](_NumTy _Other) {
+		static_assert(is_numeric<_NumTy>, "Value type must be numeric!");
+		return _Pos[_Other];
+	}
 	constexpr _Ty* unwrap() {
 		return _Pos;
 	}

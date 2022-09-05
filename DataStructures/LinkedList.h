@@ -22,10 +22,10 @@ public:
 	linkedlist(const linkedlist& _List);
 	linkedlist(linkedlist&& _List);
 	~linkedlist();
-	void append(const _Ty& _Val);
-	void append(_Ty&& _Val) noexcept;
+	void push_back(const _Ty& _Val);
+	void push_back(_Ty&& _Val) noexcept;
 	template <class _FwdIt>
-	void append(_FwdIt _First, const _FwdIt _Last);
+	void push_back(_FwdIt _First, const _FwdIt _Last);
 	template <class ..._Values>
 	void emplace_back(_Values&&... _Vals) noexcept;
 	void insert(unsigned int _Index, const _Ty& _Val);
@@ -116,20 +116,20 @@ inline linkedlist<_Ty>::~linkedlist()
 }
 
 template <class _Ty>
-inline void linkedlist<_Ty>::append(const _Ty& _Val)
+inline void linkedlist<_Ty>::push_back(const _Ty& _Val)
 {
 	_Emplace_back(_Val);
 }
 
 template <class _Ty>
-inline void linkedlist<_Ty>::append(_Ty&& _Val) noexcept
+inline void linkedlist<_Ty>::push_back(_Ty&& _Val) noexcept
 {
 	_Emplace_back(move<_Ty>(_Val));
 }
 
 template<class _Ty>
 template<class _FwdIt>
-inline void linkedlist<_Ty>::append(_FwdIt _First, const _FwdIt _Last)
+inline void linkedlist<_Ty>::push_back(_FwdIt _First, const _FwdIt _Last)
 {
 	if (_First == _Last) return;
 
@@ -162,7 +162,7 @@ inline void linkedlist<_Ty>::emplace(unsigned int _Index, _Values && ..._Vals) n
 template <class _Ty>
 inline void linkedlist<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 {
-	if (_Index == _Size) return append(_Val);
+	if (_Index == _Size) return push_back(_Val);
 
 	auto next = new node(_Val);
 
@@ -172,7 +172,7 @@ inline void linkedlist<_Ty>::insert(unsigned int _Index, const _Ty& _Val)
 template <class _Ty>
 inline void linkedlist<_Ty>::insert(unsigned int _Index, _Ty&& _Val) noexcept
 {
-	if (_Index == _Size) return append(move(_Val));
+	if (_Index == _Size) return push_back(move(_Val));
 
 	auto next = new node(move(_Val));
 

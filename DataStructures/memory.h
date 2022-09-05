@@ -12,12 +12,14 @@ struct allocator
 
 	// realloc for new operator, creates new block, moves data and deletes previous
 	static constexpr void reallocate(_Ty*& _Pointer, size_t _Old_size, size_t _New_size) {
+		reallocate(_Pointer, _Old_size, _New_size, 0);
+	}
+	static constexpr void reallocate(_Ty*& _Pointer, size_t _Old_size, size_t _New_size, size_t _Offset) {
 		auto _New_block = static_cast<_Ty*>(::operator new(_Size * _New_size));
-		_Move_memory_block(_Pointer, _New_block, min(_Old_size, _New_size));
+		_Move_memory_block(_Pointer, _New_block + _Offset, min(_Old_size, _New_size - _Offset));
 		::operator delete(_Pointer);
 		_Pointer = _New_block;
 	}
-
 	// deallocates without calling destructors
 	static constexpr void deallocate(_Ty*& _Pointer) {
 		::operator delete(_Pointer);
@@ -78,14 +80,14 @@ inline constexpr void _Move_in_place(_Ty* _Src, _Ty* _Dst, size_t _Count) {
 }
 
 template <class _Ty>
-inline void _Copy_in_place(_Ty* _First, _Ty* _Last, _Ty* _Dest) {
+inline constexpr void _Copy_in_place(_Ty* _First, _Ty* _Last, _Ty* _Dest) {
 	for (; _First != _Last; ++_First, ++_Dest) {
 		new(_Dest) _Ty(*_First);
 	}
 }
 
 template <class _Ty, class ...Args>
-inline void _Fill_in_place(_Ty* _First, _Ty* _Last, Args&&... _Args) {
+inline constexpr void _Fill_in_place(_Ty* _First, _Ty* _Last, Args&&... _Args) {
 	for (; _First != _Last; ++_First) {
 		new(_First) _Ty(forward<Args>(_Args)...);
 	}
