@@ -62,7 +62,7 @@ namespace pipeline
             return _Pipe_obj_arg<apply_push_fn, _Container>{ *this, move(_C) };
         }
         template <class _Range, class _Container>
-        constexpr _Container& operator()(_Range& _Rng, _Container& _C) const {
+        constexpr _Container operator()(_Range& _Rng, _Container& _C) const {
             _Apply_range(_Rng, _C);
             return _C;
         }
@@ -72,7 +72,7 @@ namespace pipeline
             return _C;
         }
         template <class _Range, class _Container>
-        constexpr _Container& operator()(_Range&& _Rng, _Container& _C) const {
+        constexpr _Container operator()(_Range&& _Rng, _Container& _C) const {
             _Apply_range(move(_Rng), _C);
             return _C;
         }

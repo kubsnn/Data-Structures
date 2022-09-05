@@ -149,19 +149,16 @@ inline uint64_t clockCycleCount()
 
 using namespace pipeline;
 
+#include "deque.h"
+#include <deque>
+
+
 int main()
 {
-    auto data = range<int, vector>(10, -2);
-
-    auto rng = data | transform([](int x) {return x + 1; })
-                    | remove_if([](int x) {return x % 3 == 0;})
-                    | cycle
-                    | take(12)
-                    | enumerate
-                    | to_vector;
-    
-    for (auto&& [i, e] : rng) {
-        dbg i << " " << e << nl;
-    }
+    auto rng = range<int, deque>(100);
+	
+    const auto cpy = rng;
+	
+    dbg cpy.front() << " " << cpy.back();
 }
 

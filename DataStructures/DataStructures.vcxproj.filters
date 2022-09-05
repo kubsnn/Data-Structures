@@ -95,5 +95,8 @@
     <ClInclude Include="apply.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="deque.h">
+      <Filter>Pliki nagłówkowe\containers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

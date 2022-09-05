@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,6 +148,7 @@
     <ClInclude Include="apply.hpp" />
     <ClInclude Include="array.h" />
     <ClInclude Include="cycle.hpp" />
+    <ClInclude Include="deque.h" />
     <ClInclude Include="dynarray.h" />
     <ClInclude Include="enumerate.hpp" />
     <ClInclude Include="forward_list.h" />
