@@ -157,6 +157,7 @@
     <ClInclude Include="hashtable.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="matrix.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="pointer_iterator.h" />
     <ClInclude Include="random.h" />

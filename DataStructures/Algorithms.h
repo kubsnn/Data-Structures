@@ -4,6 +4,7 @@
 
 #if __CPPVER >= 201703L
 
+#include "pointer_iterator.h"
 #include "cycle.hpp"
 #include "enumerate.hpp"
 #include "remove_if.hpp"
@@ -32,6 +33,39 @@ namespace pipeline
     template <class _Container, class _Fun, class _Arg>
     constexpr decltype(auto) operator|(_Container&& _C, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
         return _Fn._Fn(move(_C), _Fn._Arg);
+    }
+
+    namespace utils {
+        template <class _Ty, size_t _Size>
+        struct _Array_wrapper 
+        {
+            using iterator = pointer_iterator<_Ty>;
+            using const_iterator = pointer_iterator<const _Ty>;
+            using value_type = _Ty;
+
+            constexpr auto begin() {
+                return iterator(_Ptr);
+            }
+            constexpr auto begin() const {
+                return const_iterator(_Ptr);
+            }
+            constexpr auto end() {
+                return iterator(_Ptr + _Size);
+            }
+            constexpr auto end() const {
+                return const_iterator(_Ptr + _Size);
+            }
+            _Ty* _Ptr;
+        };
+    }
+
+    template <size_t _Size, class _Ty, class _Fun>
+    constexpr decltype(auto) operator|(_Ty (&_C)[_Size], _Fun _Fn) {
+        return _Fn(utils::_Array_wrapper<_Ty, _Size>{ _C });
+    }
+    template <class _Ty, class _Fun, class _Arg, size_t _Size>
+    constexpr decltype(auto) operator|(_Ty(&_C)[_Size], _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+        return _Fn._Fn(utils::_Array_wrapper<_Ty, _Size>{ _C }, _Fn._Arg);
     }
 }
 
@@ -264,3 +298,4 @@ namespace pipeline
     }
 }
 #endif
+

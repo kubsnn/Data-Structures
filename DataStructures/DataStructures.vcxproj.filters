@@ -104,5 +104,8 @@
     <ClInclude Include="to_file.hpp">
       <Filter>Pliki nagłówkowe\algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Pliki nagłówkowe\algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

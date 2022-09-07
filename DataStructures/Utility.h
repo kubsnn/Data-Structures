@@ -33,7 +33,7 @@ struct _Empty {};
 		- operator->
 
 	random access iterator requirements:
-		- unwrap() method which returns pointer to memory
+		- unwrap() method which returns random access iterator (+=, -=, +, -, <, >, <=, >=, -)
 		- operator<, >, <=, >=
 */
 struct random_access_iterator {};
