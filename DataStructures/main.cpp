@@ -37,7 +37,6 @@
 
 #include <ranges>
 
-using namespace pipeline;
 
 #include "deque.h"
 #include <deque>
@@ -45,18 +44,38 @@ using namespace pipeline;
 
 #include "random.h"
 
- 
+struct test {
+	test() {
+		dbg "CREATED" << nl;
+	}
+};
+
+auto f = []()->auto {
+	int tab[10]{ 1 };
+	fill(tab, tab + 10, 5);
+
+	return tab;
+};
+
+#include "matrix.h"
+using namespace pipeline;
+
+struct test1 {
+	array<int, 2> data[2];
+};
+
 int main()
 {
-    random r;
-    auto data = array<int, 1>()
-        | cycle
-        | transform([&r](int x) { return r.frand(); })
-        | take(10) | to_file("test.txt");
+	matrix<int, 2, 2> a(0);
+	a[0][1] = 2;
+	a[0][0] = 2;
+	a.print();
 
-	for (auto&& x : data) {
-		dbg x <<  nl;
-	}
-	return 0;
+
+	matrix<int, 2, 2> b(1);
+	b[0][0] = 2;
+
+	a -= b | transpose;
+	a.print();
+	
 }
-
