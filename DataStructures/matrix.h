@@ -273,7 +273,8 @@ inline constexpr auto matrix<_Ty, _Rows, _Cols>::dot(const matrix<_Ty2, _Cols, _
 }
 
 
-namespace pipeline {
+namespace pipeline 
+{
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	struct _Transpose_view
 	{
@@ -315,25 +316,25 @@ namespace pipeline {
 		constexpr _Transpose_iterator& operator++() {
 			_Curr += _Cols;
 			if (_Curr >= _End) {
-				if (_Curr != _End + _Cols - 1) {
-					_Curr -= _Cols * _Rows - 1;
-				}
+				_Curr -= _Cols * _Rows - 1;
+				++_Col_id;
 			}
 			return *this;
 		}
 		constexpr _Transpose_iterator operator++(int) {
 			auto _Tmp = *this;
-			++* this;
+			++*this;
 			return _Tmp;
 		}
 		constexpr friend bool operator==(const _Transpose_iterator& _It, pipeline::sentinel) {
-			return _It._Curr > _It._End;
+			return _It._Col_id == _Cols;
 		}
 		constexpr friend bool operator!=(const _Transpose_iterator& _It, pipeline::sentinel) {
-			return _It._Curr <= _It._End;
+			return _It._Col_id != _Cols;
 		}
 	private:
 		_Ty* _Curr;
+		size_t _Col_id = 0;
 		_Ty* const _End;
 	};
 
@@ -346,4 +347,21 @@ namespace pipeline {
 	};
 	
 	constexpr transpose_fn transpose = {};
+}
+
+namespace utils
+{
+	template <class _Ty, size_t _Rows, size_t _Cols>
+	constexpr auto transpose(const matrix<_Ty, _Rows, _Cols>& _M)
+	{
+		matrix<_Ty, _Cols, _Rows> _Res(0);
+
+		for (size_t i = 0; i < _Rows; ++i) {
+			for (size_t j = 0; j < _Cols; ++j) {
+				_Res[j][i] = _M[i][j];
+			}
+		}
+
+		return _Res;
+	}
 }
