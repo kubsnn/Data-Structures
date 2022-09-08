@@ -250,13 +250,13 @@ template<class _Ty, class _Ty2, size_t _Rows, size_t _Cols, size_t _C>
 inline constexpr auto operator*(const pipeline::_Transpose_view<_Ty2, _Rows, _C>& _T, const matrix<_Ty, _Rows, _Cols>& _M)
 {
 	auto _T_data = reinterpret_cast<_Ty2*>(_T._Data);
+	
+	matrix<_Ty2, _C, _Cols> _Res(0);
 
-	matrix<_Ty, _C, _Cols> _Res(0);
-
-	for (size_t i = 0; i < _Cols; ++i) {
-		for (size_t j = 0; j < _C; ++j) {
+	for (size_t i = 0; i < _C; ++i) {
+		for (size_t j = 0; j < _Cols; ++j) {
 			for (size_t k = 0; k < _Rows; ++k) {
-				_Res._Data[i][j] += *(_T_data + j * _Cols + i) * _M._Data[k][j];
+				_Res._Data[i][j] += *(_T_data + k * _C + i) * _M._Data[k][j];
 			}
 		}
 	}
