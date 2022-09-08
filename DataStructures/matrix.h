@@ -73,7 +73,12 @@ public:
 
 	template <class _Ty2, size_t _R>
 	constexpr auto operator*(const matrix<_Ty2, _Cols, _R>& _Other) const;
-	
+	template <class _Ty2, size_t _R>
+	constexpr auto operator*(const pipeline::_Transpose_view<_Ty2, _R, _Cols>& _Other) const;
+
+	template<class _Ty, class _Ty2, size_t _Rows, size_t _Cols, size_t _C>
+	constexpr friend auto operator*(const pipeline::_Transpose_view<_Ty2, _Rows, _C>& _T, const matrix<_Ty, _Rows, _Cols>& _M);
+
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	inline friend std::ostream& operator<<(std::ostream& _Ostream, const matrix& _Matrix);
 
@@ -241,6 +246,24 @@ inline constexpr decltype(auto) matrix<_Ty, _Rows, _Cols>::operator[](unsigned i
 	return _Data[_Row];
 }
 
+template<class _Ty, class _Ty2, size_t _Rows, size_t _Cols, size_t _C>
+inline constexpr auto operator*(const pipeline::_Transpose_view<_Ty2, _Rows, _C>& _T, const matrix<_Ty, _Rows, _Cols>& _M)
+{
+	auto _T_data = reinterpret_cast<_Ty2*>(_T._Data);
+
+	matrix<_Ty, _C, _Cols> _Res(0);
+
+	for (size_t i = 0; i < _Cols; ++i) {
+		for (size_t j = 0; j < _C; ++j) {
+			for (size_t k = 0; k < _Rows; ++k) {
+				_Res._Data[i][j] += *(_T_data + j * _Cols + i) * _M._Data[k][j];
+			}
+		}
+	}
+
+	return _Res;
+}
+
 template <class _Ty, size_t _Rows, size_t _Cols>
 inline std::ostream& operator<<(std::ostream& _Ostream, const matrix<_Ty, _Rows, _Cols>& _Matrix)
 {
@@ -253,6 +276,24 @@ template<class _Ty2, size_t _R>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator*(const matrix<_Ty2, _Cols, _R>& _Other) const
 {
 	return dot(_Other);
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+template<class _Ty2, size_t _R>
+inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator*(const pipeline::_Transpose_view<_Ty2, _R, _Cols>& _Other) const
+{
+	auto _T_data = reinterpret_cast<_Ty2*>(_Other._Data);
+	matrix<_Ty, _Rows, _R> _Res(0);
+	
+	for (size_t i = 0; i < _Rows; ++i) {
+		for (size_t j = 0; j < _R; ++j) {
+			for (size_t k = 0; k < _Cols; ++k) {
+				_Res._Data[i][j] += _Data[i][k] * *(_T_data + j * _Cols + k);
+			}
+		}
+	}
+
+	return _Res;
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
