@@ -508,4 +508,16 @@ namespace utils
 			if (_Fn(*_First)) *_First = _New_value;
 		}
 	}
+
+	template <class FwdIt>
+	constexpr auto average(FwdIt _First, const FwdIt _Last) {
+		remove_reference_t<decltype(*_First)> _Sum = 0;
+		size_t _Count = 0;
+		while (_First != _Last) {
+			_Sum += *_First;
+			++_First;
+			++_Count;
+		}
+		return _Sum / _Count;
+	}
 }

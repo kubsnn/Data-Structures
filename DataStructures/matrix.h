@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility.h"
+#include "algorithms.h"
 #include <iostream>
 
 /*
@@ -26,11 +27,19 @@ namespace pipeline
 	struct _Transpose_view;
 
 	struct transpose_fn;
+
 }
+
+
+
 template <class _Ty, size_t _Rows, size_t _Cols>
 class matrix
 {
 public:
+	using iterator = pointer_iterator<_Ty>;
+	using const_iterator = pointer_iterator<_Ty>;
+	using value_type = _Ty;
+
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	friend class matrix;
 	template <class _Ty, size_t _Rows, size_t _Cols>
@@ -68,6 +77,12 @@ public:
 	constexpr size_t columns() const;
 	constexpr void print() const;
 	
+	template <class _Ty2>
+	constexpr matrix mul(const matrix<_Ty2, _Rows, _Cols>& _Other) const;
+
+	template <size_t _R, size_t _C>
+	constexpr matrix<_Ty, _R, _C> reshape() const;
+
 	constexpr decltype(auto) operator[](unsigned int _Row);
 	constexpr decltype(auto) operator[](unsigned int _Row) const;
 
@@ -78,6 +93,10 @@ public:
 
 	template<class _Ty, class _Ty2, size_t _Rows, size_t _Cols, size_t _C>
 	constexpr friend auto operator*(const pipeline::_Transpose_view<_Ty2, _Rows, _C>& _T, const matrix<_Ty, _Rows, _Cols>& _M);
+
+	template <class _Ty2>
+	constexpr auto operator+(const matrix<_Ty2, _Rows, _Cols>& _Other) const;
+
 
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	inline friend std::ostream& operator<<(std::ostream& _Ostream, const matrix& _Matrix);
@@ -235,6 +254,21 @@ inline constexpr void matrix<_Ty, _Rows, _Cols>::print() const
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
+template<class _Ty2>
+inline constexpr matrix<_Ty, _Rows, _Cols> matrix<_Ty, _Rows, _Cols>::mul(const matrix<_Ty2, _Rows, _Cols>& _Other) const
+{
+	matrix<_Ty, _Rows, _Cols> _Res(0);
+
+	for (size_t i = 0; i < _Rows; ++i) {
+		for (size_t j = 0; j < _Cols; ++j) {
+			_Res._Data[i][j] += _Data[i][j] * _Other._Data[i][j];
+		}
+	}
+
+	return _Res;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr decltype(auto) matrix<_Ty, _Rows, _Cols>::operator[](unsigned int _Row)
 {
 	return _Data[_Row];
@@ -272,6 +306,14 @@ inline std::ostream& operator<<(std::ostream& _Ostream, const matrix<_Ty, _Rows,
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
+template<size_t _R, size_t _C>
+inline constexpr matrix<_Ty, _R, _C> matrix<_Ty, _Rows, _Cols>::reshape() const
+{
+	static_assert(_R * _C == _Rows * _Cols, "new size doesnt match");
+	return {reinterpret_cast<const matrix<_Ty, _R, _C>&>(*this)};
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
 template<class _Ty2, size_t _R>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator*(const matrix<_Ty2, _Cols, _R>& _Other) const
 {
@@ -294,6 +336,17 @@ inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator*(const pipeline::_Tran
 	}
 
 	return _Res;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+template<class _Ty2>
+inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator+(const matrix<_Ty2, _Rows, _Cols>& _Other) const
+{
+	auto _Tmp = *this;
+	for (auto&& [e, v] : pipeline::zip(_Tmp, const_cast<matrix<_Ty2, _Rows, _Cols>&>(_Other))) {
+		e += v;
+	}
+	return _Tmp;
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
