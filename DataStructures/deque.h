@@ -32,6 +32,9 @@ public:
 	template <class... _Values>
 	constexpr void emplace_front(_Values&&... _Vals);
 
+	constexpr _Ty pop_back();
+	constexpr _Ty pop_front();
+
 	constexpr iterator begin();
 	constexpr const_iterator begin() const;
 	constexpr iterator end();
@@ -283,6 +286,25 @@ inline constexpr void deque<_Ty, _Alloc>::emplace_front(_Values&&... _Vals)
 }
 
 template<class _Ty, class _Alloc>
+inline constexpr _Ty deque<_Ty, _Alloc>::pop_back()
+{
+	_Ty _Val = move(*--_End);
+	_Alloc::destroy(*_End._Ptr);
+	--_Size;
+	return _Val;
+}
+
+template<class _Ty, class _Alloc>
+inline constexpr _Ty deque<_Ty, _Alloc>::pop_front()
+{
+	_Ty _Val = move(*_Begin);
+	_Alloc::destroy(*_Begin._Ptr);
+	++_Begin;
+	--_Size;
+	return _Val;
+}
+
+template<class _Ty, class _Alloc>
 inline constexpr _Deque_iterator<remove_const_t<_Ty>> deque<_Ty, _Alloc>::begin()
 {
 	return _Begin;
@@ -461,7 +483,7 @@ inline constexpr void deque<_Ty, _Alloc>::_Emplace_first_el(_Values&&... _Vals)
 	_End._Block = &_Blocks[1];
 	_End._Ptr = &_Blocks[1][1];
 }
-
+ 
 template<class _Ty, class _Alloc>
 inline constexpr void deque<_Ty, _Alloc>::_Copy(const deque& _Other)
 {
