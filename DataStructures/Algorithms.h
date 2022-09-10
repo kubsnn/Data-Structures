@@ -4,6 +4,8 @@
 
 #if __CPPVER >= 201703L
 
+#include "pipeutils.hpp"
+
 #include "pointer_iterator.h"
 #include "cycle.hpp"
 #include "enumerate.hpp"
@@ -12,27 +14,27 @@
 #include "transform.hpp"
 #include "zip.hpp"
 #include "unique.hpp"
-#include "to_file.hpp"
+#include "file.hpp"
 
 #include "apply.hpp"
 
 namespace pipeline
 {
-    template <class _Container, class _Fun>
-    constexpr decltype(auto) operator|(_Container& _C, _Fun _Fn) {
-        return _Fn(_C);
+    template <range _Range, class _Fun>
+    constexpr decltype(auto) operator|(_Range& _Rng, _Fun _Fn) {
+        return _Fn(_Rng);
     }
-    template <class _Container, class _Fun>
-    constexpr decltype(auto) operator|(_Container&& _C, _Fun _Fn) {
-        return _Fn(move(_C));
+    template <range _Range, class _Fun>
+    constexpr decltype(auto) operator|(_Range&& _Rng, _Fun _Fn) {
+        return _Fn(move(_Rng));
     }
-    template <class _Container, class _Fun, class _Arg>
-    constexpr decltype(auto) operator|(_Container& _C,  _Pipe_obj_arg<_Fun, _Arg> _Fn) {
-        return _Fn._Fn(_C, _Fn._Arg);
+    template <range _Range, class _Fun, class _Arg>
+    constexpr decltype(auto) operator|(_Range& _Rng,  _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+        return _Fn._Fn(_Rng, _Fn._Arg);
     }
-    template <class _Container, class _Fun, class _Arg>
-    constexpr decltype(auto) operator|(_Container&& _C, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
-        return _Fn._Fn(move(_C), _Fn._Arg);
+    template <range _Range, class _Fun, class _Arg>
+    constexpr decltype(auto) operator|(_Range&& _Rng, _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+        return _Fn._Fn(move(_Rng), _Fn._Arg);
     }
 
     namespace utils {
@@ -64,7 +66,7 @@ namespace pipeline
         return _Fn(utils::_Array_wrapper<_Ty, _Size>{ _C });
     }
     template <class _Ty, class _Fun, class _Arg, size_t _Size>
-    constexpr decltype(auto) operator|(_Ty(&_C)[_Size], _Pipe_obj_arg<_Fun, _Arg> _Fn) {
+    constexpr decltype(auto) operator|(_Ty (&_C)[_Size], _Pipe_obj_arg<_Fun, _Arg> _Fn) {
         return _Fn._Fn(utils::_Array_wrapper<_Ty, _Size>{ _C }, _Fn._Arg);
     }
 }
@@ -298,4 +300,3 @@ namespace pipeline
     }
 }
 #endif
-

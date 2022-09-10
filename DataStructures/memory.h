@@ -41,7 +41,7 @@ struct allocator
 	// creates object in place and forwards _Args to constructor
 	template <class ..._Vals>
 	static constexpr void construct(_Ty* _Where, _Vals&&... _Args) {
-		new(_Where) _Ty(forward<_Vals>(_Args)...);
+		new (_Where) _Ty(forward<_Vals>(_Args)...);
 	}
 
 	// creates objects (in place) in range and forwards _Args to constructor

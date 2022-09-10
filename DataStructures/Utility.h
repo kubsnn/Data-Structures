@@ -68,6 +68,9 @@ struct remove_volatile<volatile _Ty> {
 template <class _Ty>
 using remove_volatile_t = typename remove_volatile<_Ty>::type;
 
+template <class _Ty>
+constexpr bool _Always_false = false;
+
 template <class>
 constexpr bool is_pointer_v = false; 
 
@@ -456,6 +459,22 @@ constexpr bool is_const<const _Ty> = true;
 
 namespace pipeline
 {
+	template <class _Ty> 
+	concept range = requires(_Ty _C) {
+		_C.begin();
+		_C.end();
+	};
+
+	template <class _Ty, class _Ty2>
+	concept pushbackable = requires(_Ty _C, _Ty2 _Val) {
+		_C.push_back(_Val);
+	};
+
+	template <class _Ty, class _Ty2>
+	concept pushfrontable = requires(_Ty _C, _Ty2 _Val) {
+		_C.push_front(_Val);
+	};
+
 	template <class _Fun, class _Arg>
 	struct _Pipe_obj_arg
 	{
@@ -515,9 +534,63 @@ namespace utils
 		size_t _Count = 0;
 		while (_First != _Last) {
 			_Sum += *_First;
-			++_First;
 			++_Count;
+			++_First;
 		}
 		return _Sum / _Count;
+	}
+
+	template <class FwdIt, class _Fun>
+	constexpr auto average_if(FwdIt _First, const FwdIt _Last, _Fun _Fn) {
+		remove_reference_t<decltype(*_First)> _Sum = 0;
+		size_t _Count = 0;
+		while (_First != _Last) {
+			if (_Fn(*_First)) {
+				_Sum += *_First;
+				++_Count;
+			}
+			++_First;
+		}
+		return _Count != 0 ? _Sum / _Count : 0;
+	}
+
+	template <class FwdIt>
+	constexpr auto sum(FwdIt _First, const FwdIt _Last) {
+		remove_reference_t<decltype(*_First)> _Sum = 0;
+		while (_First != _Last) {
+			_Sum += *_First;
+			++_First;
+		}
+		return _Sum;
+	}
+
+	template <class FwdIt, class _Fun>
+	constexpr auto sum_if(FwdIt _First, const FwdIt _Last, _Fun _Fn) {
+		remove_reference_t<decltype(*_First)> _Sum = 0;
+		while (_First != _Last) {
+			if (_Fn(*_First)) _Sum += *_First;
+			++_First;
+		}
+		return _Sum;
+	}
+
+	template <class FwdIt, class _Ty>
+	constexpr auto count(FwdIt _First, const FwdIt _Last, const _Ty& _Val) {
+		size_t _Res = 0;
+		while (_First != _Last) {
+			if (*_First == _Val) ++_Res;
+			++_First;
+		}
+		return _Res;
+	}
+	
+	template <class FwdIt, class _Fun>
+	constexpr auto count_if(FwdIt _First, const FwdIt _Last, _Fun _Fn) {
+		size_t _Res = 0;
+		while (_First != _Last) {
+			if (_Fn(*_First)) ++_Res;
+			++_First;
+		}
+		return _Res;
 	}
 }

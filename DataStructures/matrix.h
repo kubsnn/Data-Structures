@@ -49,7 +49,7 @@ public:
 	constexpr matrix() = default;
 	constexpr matrix(const _Ty& _Init_val);
 	constexpr matrix(const matrix& _Other) = default;
-	constexpr matrix(matrix&& _Other) = default;
+	constexpr matrix(matrix&& _Other) noexcept = default;
 
 	constexpr matrix& operator=(const matrix& _Other);;
 	constexpr matrix& operator=(matrix&& _Other) noexcept;
@@ -99,6 +99,12 @@ public:
 	
 	template <class _Ty2, size_t _C = _Cols>
 	constexpr auto operator+(const matrix<_Ty2, 1, _C>& _Other);
+
+	template <class _Ty2>
+	constexpr auto operator-(const matrix<_Ty2, _Rows, _Cols>& _Other) const;
+
+	template <class _Ty2, size_t _C = _Cols>
+	constexpr auto operator-(const matrix<_Ty2, 1, _C>& _Other);
 
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	inline friend std::ostream& operator<<(std::ostream& _Ostream, const matrix& _Matrix);
@@ -380,6 +386,34 @@ inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator+(const matrix<_Ty2, 1,
 	while (_Begin != _End) {
 		for (size_t i = 0; i < _Cols; ++i, ++_Begin) {
 			*_Begin += static_cast<_Ty>(_Other._Data[0][i]);
+		}
+	}
+
+	return _Tmp;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+template<class _Ty2>
+inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator-(const matrix<_Ty2, _Rows, _Cols>& _Other) const
+{
+	auto _Tmp = *this;
+	for (auto&& [e, v] : pipeline::zip(_Tmp, const_cast<matrix<_Ty2, _Rows, _Cols>&>(_Other))) {
+		e -= v;
+	}
+	return _Tmp;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+template<class _Ty2, size_t _C>
+inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator-(const matrix<_Ty2, 1, _C>& _Other)
+{
+	auto _Tmp = *this;
+	auto _End = reinterpret_cast<_Ty*>(_Tmp._Data) + _Rows * _Cols;
+	auto _Begin = reinterpret_cast<_Ty*>(_Tmp._Data);
+
+	while (_Begin != _End) {
+		for (size_t i = 0; i < _Cols; ++i, ++_Begin) {
+			*_Begin -= static_cast<_Ty>(_Other._Data[0][i]);
 		}
 	}
 
