@@ -39,6 +39,7 @@ public:
 
 	constexpr void remove_at(unsigned int _Index);
 	constexpr iterator remove(iterator _Where);
+	constexpr void pop_back();
 
 	constexpr size_t size() const;
 	constexpr size_t _max_size() const;
@@ -219,6 +220,12 @@ inline constexpr pointer_iterator<_Ty> vector<_Ty, _Alloc>::remove(iterator _Whe
 }
 
 template<class _Ty, class _Alloc>
+inline constexpr void vector<_Ty, _Alloc>::pop_back()
+{
+	remove_at(_Size - 1);
+}
+
+template<class _Ty, class _Alloc>
 inline constexpr size_t vector<_Ty, _Alloc>::size() const
 {
 	return _Size;
@@ -394,9 +401,9 @@ inline constexpr void vector<_Ty, _Alloc>::_Try_resize(size_t _NewSize)
 	if (_NewSize <= _MaxSize) return;
 
 	size_t _Calculated_size = nearest_bigger_power_of_2(_NewSize);
-	_Alloc::reallocate(_Data, _Size, _Calculated_size);
+	_Alloc::reallocate(_Data, _Size - 1, _Calculated_size);
 
-	_MaxSize = _NewSize;
+	_MaxSize = _Calculated_size;
 }
 
 template<class _Ty, class _Alloc>
