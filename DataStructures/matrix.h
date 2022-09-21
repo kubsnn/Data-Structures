@@ -37,7 +37,7 @@ class matrix
 {
 public:
 	using iterator = pointer_iterator<_Ty>;
-	using const_iterator = pointer_iterator<_Ty>;
+	using const_iterator = pointer_iterator<const _Ty>;
 	using value_type = _Ty;
 
 	template <class _Ty, size_t _Rows, size_t _Cols>
@@ -76,6 +76,7 @@ public:
 	constexpr size_t rows() const;
 	constexpr size_t columns() const;
 	constexpr void print() const;
+	constexpr auto shape() const;
 	
 	template <class _Ty2>
 	constexpr matrix mul(const matrix<_Ty2, _Rows, _Cols>& _Other) const;
@@ -232,25 +233,25 @@ inline constexpr matrix<_Ty, _Rows, _Cols>& matrix<_Ty, _Rows, _Cols>::operator-
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::begin()
 {
-	return pointer_iterator(reinterpret_cast<_Ty*>(_Data));
+	return iterator(reinterpret_cast<_Ty*>(_Data));
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::begin() const
 {
-	return pointer_iterator(reinterpret_cast<_Ty*>(_Data));
+	return const_iterator(reinterpret_cast<const _Ty*>(_Data));
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::end()
 {
-	return pointer_iterator(reinterpret_cast<_Ty*>(_Data) + _Rows * _Cols);
+	return iterator(reinterpret_cast<_Ty*>(_Data) + _Rows * _Cols);
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr auto matrix<_Ty, _Rows, _Cols>::end() const
 {
-	return pointer_iterator(reinterpret_cast<_Ty*>(_Data) + _Rows * _Cols);
+	return const_iterator(reinterpret_cast<const _Ty*>(_Data) + _Rows * _Cols);
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
@@ -277,6 +278,12 @@ inline constexpr void matrix<_Ty, _Rows, _Cols>::print() const
 		std::cout << '\n';
 	}
 	std::cout << "}" << std::endl;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+inline constexpr auto matrix<_Ty, _Rows, _Cols>::shape() const
+{
+	return pair{ _Rows, _Cols };
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>

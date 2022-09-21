@@ -115,6 +115,9 @@ constexpr bool has_tag<_Ty, _Tag, typename enable_if<typename _Ty::category>::ty
 template <class _Ty>
 constexpr bool is_random_access = has_tag<_Ty, random_access_iterator>;
 
+template <class _Base, class _Derived>
+constexpr bool is_base_of_v = __is_base_of(_Base, _Derived);
+
 template <class _Ty, class Enable = void>
 struct tag_of {
 	using tag = void;
@@ -221,8 +224,8 @@ inline void copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 	}
 }
 
-template <class _InIt, class _OutIt>
-inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count) {
+template <class _BidirIt, class _OutIt>
+inline void move_mem(_BidirIt _Src, _OutIt _Dst, size_t _Count) {
 	if (_Src == _Dst) return;
 	if (_Src > _Dst) {
 		for (int i = 0; i < _Count; ++i) {
@@ -230,7 +233,7 @@ inline void move_mem(_InIt _Src, _OutIt _Dst, size_t _Count) {
 			++_Dst; ++_Src;
 		}
 	} else {
-		_InIt _RSrc = _Src + _Count - 1;
+		_BidirIt _RSrc = _Src + _Count - 1;
 		_OutIt _RDst = _Dst + _Count - 1;
 		for (int i = 0; i < _Count; ++i) {
 			*_RDst = move(*_RSrc);
@@ -459,7 +462,7 @@ constexpr bool is_const<const _Ty> = true;
 
 namespace pipeline
 {
-	template <class _Ty> 
+	template <class _Ty>
 	concept range = requires(_Ty _C) {
 		_C.begin();
 		_C.end();
@@ -475,6 +478,16 @@ namespace pipeline
 		_C.push_front(_Val);
 	};
 
+	template <class _Ty>
+	concept iter = requires(_Ty _It, auto _It2) {
+		*_It;
+		++_It;
+		_It++;
+		_It == _It2;
+		_It != _It2;
+	};
+
+
 	template <class _Fun, class _Arg>
 	struct _Pipe_obj_arg
 	{
@@ -488,6 +501,37 @@ namespace pipeline
 	};
 	struct sentinel { };
 }
+
+namespace utils
+{
+	template <pipeline::iter FwdIt, class EndIt>
+	constexpr decltype(auto) max(FwdIt _First, EndIt _Last) {
+		if (_First == _Last) {
+			return *_First;
+		}
+		auto _Max = _First;
+		while (++_First != _Last) {
+			if (*_Max < *_First) {
+				_Max = _First;
+			}
+		}
+		return *_Max;
+	}
+	template <class FwdIt, class EndIt>
+	constexpr decltype(auto) min(FwdIt _First, EndIt _Last) {
+		if (_First == _Last) {
+			return *_First;
+		}
+		auto _Min = _First;
+		while (++_First != _Last) {
+			if (*_Min > *_First) {
+				_Min = _First;
+			}
+		}
+		return *_Min;
+	}
+}
+
 #endif
 
 namespace utils
@@ -593,4 +637,5 @@ namespace utils
 		}
 		return _Res;
 	}
+
 }

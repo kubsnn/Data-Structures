@@ -56,4 +56,37 @@ namespace pipeline
 	};
 	
 	constexpr average_if_fn average_if = {};
+
+	
+	struct distance_fn
+	{
+		template <range _Range>
+		constexpr auto operator()(_Range&& _Rng) const {
+			return ::distance(_Rng.begin(), _Rng.end());
+		}
+	};
+
+	constexpr distance_fn distance = {};
+
+
+	struct max_fn
+	{
+		template <range _Range>
+		constexpr auto operator()(_Range&& _Rng) const {
+			return ::utils::max(_Rng.begin(), _Rng.end());
+		}
+	};
+
+	constexpr max_fn max = {};
+
+
+	struct min_fn
+	{
+		template <range _Range>
+		constexpr auto operator()(_Range&& _Rng) const {
+			return ::utils::min(_Rng.begin(), _Rng.end());
+		}
+	};
+
+	constexpr min_fn min = {};
 }
