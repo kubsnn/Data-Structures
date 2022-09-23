@@ -54,6 +54,8 @@ public:
 	constexpr void shrink_to_fit();
 	constexpr void clear();
 
+	constexpr _Ty& back();
+
 	constexpr _Ty& operator[](unsigned int _Index);
 	constexpr const _Ty& operator[](unsigned int _Index) const;
 
@@ -300,6 +302,12 @@ inline constexpr void vector<_Ty, _Alloc>::clear()
 }
 
 template<class _Ty, class _Alloc>
+inline constexpr _Ty& vector<_Ty, _Alloc>::back()
+{
+	return _Data[_Size - 1];
+}
+
+template<class _Ty, class _Alloc>
 inline constexpr _Ty& vector<_Ty, _Alloc>::operator[](unsigned int _Index)
 {
 	return _Data[_Index];
@@ -400,7 +408,7 @@ inline constexpr void vector<_Ty, _Alloc>::_Try_resize(size_t _NewSize)
 {
 	if (_NewSize <= _MaxSize) return;
 
-	size_t _Calculated_size = nearest_bigger_power_of_2(_NewSize);
+	size_t _Calculated_size = _MaxSize << 1;;
 	_Alloc::reallocate(_Data, _Size - 1, _Calculated_size);
 
 	_MaxSize = _Calculated_size;

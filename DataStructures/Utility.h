@@ -487,7 +487,6 @@ namespace pipeline
 		_It != _It2;
 	};
 
-
 	template <class _Fun, class _Arg>
 	struct _Pipe_obj_arg
 	{
@@ -504,6 +503,11 @@ namespace pipeline
 
 namespace utils
 {
+	template <class _Fn, class... _FnArgs>
+	concept function = requires(_Fn _Func, _FnArgs&&... _Args) {
+		_Func(forward<_FnArgs>(_Args)...);
+	};
+	
 	template <pipeline::iter FwdIt, class EndIt>
 	constexpr decltype(auto) max(FwdIt _First, EndIt _Last) {
 		if (_First == _Last) {
