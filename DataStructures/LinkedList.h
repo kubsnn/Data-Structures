@@ -28,6 +28,10 @@ public:
 	void push_back(_FwdIt _First, const _FwdIt _Last);
 	template <class ..._Values>
 	void emplace_back(_Values&&... _Vals) noexcept;
+	void push_front(const _Ty& _Val);
+	void push_front(_Ty&& _Val) noexcept;
+	template <class ..._Values>
+	void emplace_front(_Values&&... _Vals) noexcept;
 	void insert(unsigned int _Index, const _Ty& _Val);
 	void insert(unsigned int _Index, _Ty&& _Val) noexcept;
 	template <class ..._Values>
@@ -35,7 +39,7 @@ public:
 	bool remove_at(unsigned int _Index);
 	bool remove(const _Ty& _Val);
 	iterator remove(iterator _Where);
-	bool pop_begin();
+	bool pop_front();
 	bool pop_back();
 	void clear();
 	iterator find(const _Ty& _Val);
@@ -72,6 +76,8 @@ private:
 
 	template <class ..._Values>
 	void _Emplace_back(_Values&& ..._Vals) noexcept;
+	template <class ..._Values>
+	void _Emplace_front(_Values&& ..._Vals) noexcept;
 	template <class ..._Values>
 	void _Emplace(unsigned int _Index, _Values&&... _Vals) noexcept;
 	void _Insert_node(node*& _Node, unsigned int _Index);
@@ -152,6 +158,25 @@ inline void linkedlist<_Ty>::emplace_back(_Values&& ..._Vals) noexcept
 	_Emplace_back(forward<_Values>(_Vals)...);
 }
 
+template <class _Ty>
+inline void linkedlist<_Ty>::push_front(const _Ty& _Val)
+{
+	_Emplace_front(_Val);
+}
+
+template <class _Ty>
+inline void linkedlist<_Ty>::push_front(_Ty&& _Val) noexcept
+{
+	_Emplace_front(move<_Ty>(_Val));
+}
+
+template <class _Ty>
+template<class ..._Values>
+inline void linkedlist<_Ty>::emplace_front(_Values&& ..._Vals) noexcept
+{
+	_Emplace_front(forward<_Values>(_Vals)...);
+}
+
 template<class _Ty>
 template<class ..._Values>
 inline void linkedlist<_Ty>::emplace(unsigned int _Index, _Values && ..._Vals) noexcept
@@ -183,7 +208,7 @@ template <class _Ty>
 inline bool linkedlist<_Ty>::remove_at(unsigned int _Index)
 {
 	if (_Index == _Size - 1) return pop_back();
-	if (_Index == 0) return pop_begin();
+	if (_Index == 0) return pop_front();
 
 	auto node = _Search(_Index);
 	auto prev = node->prev;
@@ -223,7 +248,7 @@ template<class _Ty>
 inline linkedlist_iterator<_Ty> linkedlist<_Ty>::remove(iterator _Where)
 {
 	if (_Where == _Tail) return pop_back();
-	if (_Where == _Head) return pop_begin();
+	if (_Where == _Head) return pop_front();
 
 	auto node = _Where._List;
 	auto prev = node->prev;
@@ -239,7 +264,7 @@ inline linkedlist_iterator<_Ty> linkedlist<_Ty>::remove(iterator _Where)
 }
 
 template <class _Ty>
-inline bool linkedlist<_Ty>::pop_begin()
+inline bool linkedlist<_Ty>::pop_front()
 {
 	if (_Size > 1) {
 		auto next = _Head->next;
@@ -422,6 +447,13 @@ inline void linkedlist<_Ty>::_Emplace_back(_Values&& ..._Vals) noexcept
 	++_Size;
 }
 
+template <class _Ty>
+template <class ..._Values>
+inline void linkedlist<_Ty>::_Emplace_front(_Values&& ..._Vals) noexcept
+{
+	_Emplace(0, ::forward<_Values>(_Vals)...);
+}
+
 template<class _Ty>
 template<class ..._Values>
 inline void linkedlist<_Ty>::_Emplace(unsigned int _Index, _Values && ..._Vals) noexcept
@@ -444,7 +476,6 @@ inline void linkedlist<_Ty>::_Emplace(unsigned int _Index, _Values && ..._Vals) 
 
 	++_Size;
 }
-
 
 template <class _Ty>
 inline void linkedlist<_Ty>::_Insert_node(node*& _Node, unsigned int _Index)
