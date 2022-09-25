@@ -79,7 +79,7 @@ public:
 	constexpr auto shape() const;
 	
 	template <class _Ty2>
-	constexpr matrix mul(const matrix<_Ty2, _Rows, _Cols>& _Other) const;
+	constexpr void mul(const matrix<_Ty2, _Rows, _Cols>& _Other);
 
 	template <size_t _R, size_t _C>
 	constexpr matrix<_Ty, _R, _C> reshape() const;
@@ -107,6 +107,9 @@ public:
 	template <class _Ty2, size_t _C = _Cols>
 	constexpr auto operator-(const matrix<_Ty2, 1, _C>& _Other);
 
+	template <class _Ty2, size_t _R>
+	constexpr auto dot_create_dyn(const pipeline::_Transpose_view<_Ty2, _R, _Cols>& _Other) const;
+	
 	template <class _Ty, size_t _Rows, size_t _Cols>
 	inline friend std::ostream& operator<<(std::ostream& _Ostream, const matrix& _Matrix);
 
@@ -128,18 +131,21 @@ inline constexpr matrix<_Ty, _Rows, _Cols>::matrix(const _Ty& _Init_val)
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr matrix<_Ty, _Rows, _Cols>& matrix<_Ty, _Rows, _Cols>::operator=(const matrix& _Other)
 {
-	for (auto&& [dst, src] : pipeline::zip(*this, const_cast<matrix&>(_Other))) {
-		dst = src;
-	}
+	auto _Begin = reinterpret_cast<_Ty*>(_Other._Data);
+	auto _End = reinterpret_cast<_Ty*>(_Other._Data + _Rows * _Cols);
+	auto _It = reinterpret_cast<_Ty*>(_Data);
+	::copy(_Begin, _End, _It);
 	return *this;
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
 inline constexpr matrix<_Ty, _Rows, _Cols>& matrix<_Ty, _Rows, _Cols>::operator=(matrix&& _Other) noexcept
 {
-	for (auto&& [dst, src] : pipeline::zip(*this, _Other)) {
-		dst = move(src);
-	}
+	auto _Begin = reinterpret_cast<_Ty*>(_Other._Data);
+	auto _End = reinterpret_cast<_Ty*>(_Other._Data + _Rows * _Cols);
+	auto _It = reinterpret_cast<_Ty*>(_Data);
+	::unsafe_move(_Begin, _End, _It);
+
 	return *this;
 }
 
@@ -198,8 +204,6 @@ inline constexpr matrix<_Ty, _Rows, _Cols>& matrix<_Ty, _Rows, _Cols>::operator+
 	for (; _Begin != _End; ++_Begin) {
 		*_Begin += static_cast<_Ty>(_Val);
 	}
-
-	
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
@@ -288,17 +292,13 @@ inline constexpr auto matrix<_Ty, _Rows, _Cols>::shape() const
 
 template<class _Ty, size_t _Rows, size_t _Cols>
 template<class _Ty2>
-inline constexpr matrix<_Ty, _Rows, _Cols> matrix<_Ty, _Rows, _Cols>::mul(const matrix<_Ty2, _Rows, _Cols>& _Other) const
+inline constexpr void matrix<_Ty, _Rows, _Cols>::mul(const matrix<_Ty2, _Rows, _Cols>& _Other)
 {
-	matrix<_Ty, _Rows, _Cols> _Res(0);
-
 	for (size_t i = 0; i < _Rows; ++i) {
 		for (size_t j = 0; j < _Cols; ++j) {
-			_Res._Data[i][j] += _Data[i][j] * _Other._Data[i][j];
+			_Data[i][j] *= _Other._Data[i][j];
 		}
 	}
-
-	return _Res;
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>
@@ -425,6 +425,25 @@ inline constexpr auto matrix<_Ty, _Rows, _Cols>::operator-(const matrix<_Ty2, 1,
 	}
 
 	return _Tmp;
+}
+
+template<class _Ty, size_t _Rows, size_t _Cols>
+template <class _Ty2, size_t _R>
+constexpr auto matrix<_Ty, _Rows, _Cols>::dot_create_dyn(const pipeline::_Transpose_view<_Ty2, _R, _Cols>& _Other) const
+{
+	auto _Res = new matrix<_Ty, _Rows, _R>(0);
+
+	auto _T_data = reinterpret_cast<_Ty2*>(_Other._Data);
+
+	for (size_t i = 0; i < _Rows; ++i) {
+		for (size_t j = 0; j < _R; ++j) {
+			for (size_t k = 0; k < _Cols; ++k) {
+				_Res->_Data[i][j] += _Data[i][k] * *(_T_data + j * _Cols + k);
+			}
+		}
+	}
+
+	return _Res;
 }
 
 template<class _Ty, size_t _Rows, size_t _Cols>

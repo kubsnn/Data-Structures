@@ -202,10 +202,9 @@ inline constexpr void iter_swap(_Iter _Left, _Iter _Right) {
 }
 
 template <class _FwdIt, class _Ty>
-inline constexpr void fill(const _FwdIt _First, const _FwdIt _Last, const _Ty& _Val) {
-	auto _UFirst = const_cast<_FwdIt&>(_First);
-	for (; _UFirst != _Last; ++_UFirst) {
-		*_UFirst = _Val;
+inline constexpr void fill(_FwdIt _First, const _FwdIt _Last, const _Ty& _Val) {
+	for (; _First != _Last; ++_First) {
+		*_First = _Val;
 	}
 }
 
@@ -239,6 +238,13 @@ inline void move_mem(_BidirIt _Src, _OutIt _Dst, size_t _Count) {
 			*_RDst = move(*_RSrc);
 			--_RDst; --_RSrc;
 		}
+	}
+}
+
+template <class _InIt, class _OutIt>
+inline void unsafe_move(_InIt _First, _InIt _Last, _OutIt _Dest) {
+	for (; _First != _Last; ++_First, ++_Dest) {
+		*_Dest = move(*_First);
 	}
 }
 
